@@ -34,7 +34,7 @@ def audit_hook(event, arg, *rest):
     or "put" in event or event.endswith("id")
   )):
     raise Exception(f"Call to {event}{arg} disallowed")
-  if ("proc" in event or "thread" in event or "remove" in event or "del" in event or "sock" in event or "hook" in event
+  if ("proc" in event or "thread" in event or "remove" in event or "del" in event or "hook" in event
   or "update" in event or "put" in event or "mk" in event
   or "rm" in event or "touch" in event or "make" in event
   or "set" in event or "shell" in event):
