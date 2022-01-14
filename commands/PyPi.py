@@ -8,7 +8,10 @@ class PyPi(commands.Cog):
         self.bot = bot
    
     @commands.command(alias="pypi")
-    async def pypi(self, ctx, name):
+    async def pypi(self, ctx, name=None):
+        if name is None:
+            await ctx.send('Package name required.')
+            return
         resp = requests.get("https://pypi.org/pypi/" + name + "/json")
         if resp.status_code == 404:
             await ctx.send("No such thing")
