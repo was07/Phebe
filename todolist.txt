@@ -1,0 +1,6 @@
+!e command for executing code (complete)
+!PyPi command for looking up PyPi modules and packages (complete)
+moderation
+fun stuff
+docs access (complete)
+resources 
