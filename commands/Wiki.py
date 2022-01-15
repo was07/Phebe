@@ -17,7 +17,7 @@ class HtmlToDiscord:
         "b,strong": "**{text}**",
         "i,em": "*{text}*",
         "u": "__{text}__",
-        "a": "({href})[{text}]",
+        "a": "[{text}]({href})",
         "p": "\x0A{html}\x0A",
         "sup": "",
     }
