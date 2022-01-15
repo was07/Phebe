@@ -1,5 +1,5 @@
 from base import *
-import bs4, requests
+import bs4, re, requests
 from bs4 import BeautifulSoup as BS, Tag, TemplateString
 from bs4.builder import FAST, HTMLParserTreeBuilder
 from functools import lru_cache
@@ -97,34 +97,46 @@ class HtmlToDiscord:
         target_url = urljoin(resolve_from.geturl(), href)
         return target_url
     
+    @staticmethod
+    def size_and_src(img: Tag) -> tuple[int, str]:
+        if "srcset" in img.attrs:
+            srcsets = img.attrs["srcset"].split(",")
+            for srcset in srcsets:
+                src, size_str, *_ = srcset.split()
+                sizem = re.search("^(\\d+)", size_str)
+                if sizem:
+                    size = int(sizem.group(1))
+                    return size, src
+        size = 0
+        src = img.attrs.get("src")
+        for attr in ("data-image-width", "data-width", "width", "data-image-height", "data-height", "height"):
+            val = img.attrs.get(attr)
+            if not val: continue
+            size = int(val)
+            break
+        if not src:
+            for k, v in img.attrs.items():
+                urlm = re.search("(?=^|\s|,)((?:https?:)//(\S+))", v)
+                if urlm:
+                    src = urlm.group(1)
+                    break
+        return size, src
+   
     @property
     def thumbnail(self) -> str:
         if self._thumbnail is None:
-            img_tags = sorted(
-                [
-                    (
-                        int(
-                            e.attrs.get(
-                                "width",
-                                e.attrs.get(
-                                    "data-file-width"
-                                )
-                            ) or "0"
-                        ),
-                        e
-                    )
-                    for e in self.doc.select(
-                        'img:not([src*=".svg"])'
-                    )
-                ],
-                key=lambda i: i[0],
-                reverse=True,
-            )
+            img_tags = self.doc.select('.infobox-image img')
+            if not img_tags:
+                img_tags = self.doc.select(
+                            'img:not([src*=".svg"])'
+                           )
             if img_tags:
-                img_tag = img_tags[0][1]
-                self._thumbnail = HtmlToDiscord.abs_url(
-                    self.url, img_tag.attrs["src"]
+                ordered = list(
+                    map(HtmlToDiscord.size_and_src, img_tags)
                 )
+                size, src = ordered[-1]
+                url = HtmlToDiscord.abs_url(self.url, src)
+                self._thumbnail = url
             else:
                 self._thumbnail = ""
         return self._thumbnail
