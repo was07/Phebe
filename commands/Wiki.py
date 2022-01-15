@@ -192,8 +192,15 @@ class Wiki(commands.Cog):
     
             response = requests.get(newurl)
             if b"may refer to" in response.content:
-                continue
-            break
+              conv = HtmlToDiscord(response.content.decode())
+              links = conv.doc.select('ul > li a[title]')
+              print(links)
+              rel_url = links[0].attrs["href"]
+              url = HtmlToDiscord.abs_url(conv.url, rel_url)
+              response = requests.get(url)
+              break
+            else:
+              break
         html = response.content
         odx = html.find(b"mf-section-0")
         if odx != -1:
