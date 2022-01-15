@@ -182,7 +182,8 @@ class Wiki(commands.Cog):
         return wiki_url
     
     def _do_wiki(self, name) -> Embed:
-        while True:
+        attempts = 0
+        while (attempts:=attempts+1) < 3:
             print(f"{name=}")
             url = self._url_from_search(name)
             print(f"{name=} -> wiki {url=}")
