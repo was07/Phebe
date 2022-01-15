@@ -176,7 +176,7 @@ class Wiki(commands.Cog):
         wiki_url = HtmlToDiscord.abs_url(
             result_page.url,
             result_page.doc.select(
-                'a[data-serp-pos="1"]'
+                'a[data-serp-pos]'
             )[0].attrs["href"]
         )
         return wiki_url
@@ -190,7 +190,7 @@ class Wiki(commands.Cog):
             print(newurl)
     
             response = requests.get(newurl)
-            if b"may refer to" in response.content or response.status_code != 200:
+            if b"may refer to" in response.content:
                 del response
                 continue
             break
@@ -200,6 +200,7 @@ class Wiki(commands.Cog):
             html = html[0 : odx + 8000]
         
         conv = HtmlToDiscord(html)
+        
         paras = conv.doc.select(
             "#mf-section-0 > p:not(.mw-empty-elt)"
         )
