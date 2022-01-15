@@ -192,7 +192,6 @@ class Wiki(commands.Cog):
     
             response = requests.get(newurl)
             if b"may refer to" in response.content:
-                del response
                 continue
             break
         html = response.content
