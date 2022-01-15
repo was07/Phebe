@@ -2,11 +2,11 @@ from flask import request, Flask
 from threading import Thread
 from time import sleep
 import os
+import sys
 app = Flask("")
 
 @app.route("/")
-def Main():
-  import sys
+def index():
   #bot = sys.modules["__main__"].bot
   #bot.run(os.getenv('Token'))
   return '<div style="color: green; font-size: 40px">Bot is awake.</div>'
@@ -36,5 +36,3 @@ def check():
     return
   th = Thread(target=keepalive)
   th.start()
-
-
