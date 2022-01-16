@@ -4,34 +4,37 @@ class FakeStream(__import__("io").StringIO):
   def fileno(self):
     return 1
 
-import subprocess
-def run(src):
-  # sio_stdout, sio_stderr = (StringIO(), StringIO())
-  sio_stdout, sio_stderr = (FakeStream(), FakeStream())
-  
-  p = subprocess.run(
-      ["timeout", "1.5s", sys.executable, "-r", __file__],
-      input=src,
-      encoding="utf-8",
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE,
-      shell=False,
-  )
-  try:
-    p.check_returncode()
-  except Exception as e:
-    import traceback
-    traceback.print_exc()
-  rs = p.returncode
-  output = sio_stdout.getvalue()
-  errors = sio_stderr.getvalue()
-  return (rs, p.stdout, p.stderr)
 
 def _t():
   import types, sys
   from collections.abc import Mapping
   __sys_mod = sys.modules
   _ModDict__sys_mod = __sys_mod
+  
+  import subprocess
+  def run(src):
+    # sio_stdout, sio_stderr = (StringIO(), StringIO())
+    sio_stdout, sio_stderr = (FakeStream(), FakeStream())
+    
+    p = subprocess.run(
+        ["timeout", "1.5s", sys.executable, "-r", __file__],
+        input=src,
+        encoding="utf-8",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=False,
+    )
+    try:
+      p.check_returncode()
+    except Exception as e:
+      import traceback
+      traceback.print_exc()
+    rs = p.returncode
+    output = sio_stdout.getvalue()
+    errors = sio_stderr.getvalue()
+    return (rs, p.stdout, p.stderr)
+  run.sys = sys
+  run.subprocess = subprocess
 
   class Default:
     def __bool__(self):
@@ -160,6 +163,7 @@ def _t():
     
     exec(code, {**builtins.__dict__, "__name__":"__maim__"})
     raise SystemExit(0)
-
+  else:
+    globals().__setitem__("run", run)
 
 (_:=_t(), globals().__delitem__("_"))
