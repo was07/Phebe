@@ -4,10 +4,11 @@ class FakeStream(__import__("io").StringIO):
   def fileno(self):
     return 1
 
-
+import subprocess
 def run(src):
   # sio_stdout, sio_stderr = (StringIO(), StringIO())
   sio_stdout, sio_stderr = (FakeStream(), FakeStream())
+  
   p = subprocess.run(
       ["timeout", "1.5s", sys.executable, "-r", __file__],
       input=src,
