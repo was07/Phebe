@@ -29,8 +29,10 @@ class Eval(commands.Cog):
         if rs is not None:
             color = disnake.Colour.green() if rs == 0 else disnake.Colour.red()
             output = []
-            stdout_truncated = stdout[:200] + ('' if len(stdout) < 200 else '... (output truncated)')
-            stderr_truncated = stderr[:200] + ('' if len(stderr) < 200 else '... (output truncated)')
+
+            output_limit = 1950
+            stdout_truncated = stdout[:output_limit] + ('' if len(stdout) < output_limit else '... (output truncated)')
+            stderr_truncated = stderr[:output_limit] + ('' if len(stderr) < output_limit else '... (output truncated)')
           
             if stderr:
                 output.append("\n".join((
