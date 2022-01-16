@@ -72,10 +72,10 @@ class Phebe(commands.Cog):
     @commands.command()
     async def format(self, ctx):
 	    await ctx.send(embed=disnake.Embed(title='Code formatting',description="""
-		To properly format Python code in discord, write your code like this:
-```
-```py
-print("Hello world")\u200B`\u200B`\u200B`\u200B```\n    **These are backticks, not quotes**. They are often under the esc key on most keyboard orientations, they could be towards the right side of the keyboard if you are using eastern european/balkan language keyboards.
+		To properly format Python code in Discord, write your code like this:
+
+\\`\\`\\`py
+print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They are often under the Escape (esc) key on most keyboard orientations, they could be towards the right side of the keyboard if you are using eastern european/balkan language keyboards.
 
 This will result in proper syntax highlighting which makes it easier to see your code."""))
 
