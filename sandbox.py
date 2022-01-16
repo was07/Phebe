@@ -144,9 +144,19 @@ def _t():
       del sys.modules["os"]
     except:
       pass
-    del sys.modules["sys"]
+    try:
+      del sys.modules["sys"]
+    except:
+      pass
     sys.modules = sys_modules
-    del sys
+    try:
+      del sys
+    except:
+      pass
+    try:
+      del os
+    except:
+      pass
     
     exec(code, {**builtins.__dict__, "__name__":"__maim__"})
     raise SystemExit(0)
