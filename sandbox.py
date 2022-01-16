@@ -31,7 +31,7 @@ def _t():
         print(e.args[0])
       else:
         import traceback
-          traceback.print_exc()
+        traceback.print_exc()
     
     rs = p.returncode
     output = sio_stdout.getvalue()
