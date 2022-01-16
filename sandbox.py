@@ -17,7 +17,7 @@ def _t():
     sio_stdout, sio_stderr = (FakeStream(), FakeStream())
     
     p = subprocess.run(
-        ["timeout", "1.5s", sys.executable, "-r", __file__],
+        ["timeout", "0.5s", "env", "-i", sys.executable, __file__],
         input=src,
         encoding="utf-8",
         stdout=subprocess.PIPE,
@@ -29,6 +29,7 @@ def _t():
     except Exception as e:
       import traceback
       traceback.print_exc()
+    
     rs = p.returncode
     output = sio_stdout.getvalue()
     errors = sio_stderr.getvalue()
