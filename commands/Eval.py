@@ -42,8 +42,13 @@ class Eval(commands.Cog):
                   f"{len(stdout)} characters):",
                   f"```\n{stdout}\n```"
                 )))
+            outcome = "successfully" if rs == 0 else "abnormally" 
+            if not stderr and not stdout:
+                output.append(f"Program {outcome} completed with exit status {rs} and produced no output.")
+            else:
+                output.append(f"Program {outcome} completed with exit status {rs}.")
             description = "\n".join(output)
-        await ctx.send(embed=disnake.Embed(
+        await ctx.reply(embed=disnake.Embed(
             title = "Output",
             description=description,
             color=color,
