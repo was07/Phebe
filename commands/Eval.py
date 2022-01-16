@@ -29,18 +29,20 @@ class Eval(commands.Cog):
         if rs is not None:
             color = disnake.Colour.green() if rs == 0 else disnake.Colour.red()
             output = []
+            stdout_truncated = stdout[:200] + ('' if len(stdout) < 200 else '... (output truncated)')
+            stderr_truncated = stderr[:200] + ('' if len(stderr) < 200 else '... (output truncated)')
           
             if stderr:
                 output.append("\n".join((
                   "_Standard Error_ (" 
                   f"{len(stderr)} characters):",
-                  f"```\n{stderr}\n```"
+                  f"```\n{stderr_truncated}\n```"
                 )))
             if stdout:
                 output.append("\n".join((
                   "_Standard Output_ (" 
                   f"{len(stdout)} characters):",
-                  f"```\n{stdout}\n```"
+                  f"```\n{stdout_truncated}\n```"
                 )))
             outcome = "successfully" if rs == 0 else "abnormally" 
             if not stderr and not stdout:
