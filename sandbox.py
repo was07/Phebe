@@ -27,8 +27,11 @@ def _t():
     try:
       p.check_returncode()
     except Exception as e:
-      import traceback
-      traceback.print_exc()
+      if type(e) is Exception:
+        print(e.args[0])
+      else:
+        import traceback
+          traceback.print_exc()
     
     rs = p.returncode
     output = sio_stdout.getvalue()
