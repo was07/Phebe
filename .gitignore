@@ -6,3 +6,13 @@ __pycache__
 
 
 *.pyc
+
+# backup files
+*.bak
+*.mod
+
+
+# junk files
+.hypothesis
+.hypothesis/**
+
