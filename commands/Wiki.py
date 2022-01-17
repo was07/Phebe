@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as BS, Tag, TemplateString
 from bs4.builder import FAST, HTMLParserTreeBuilder
 from functools import lru_cache
 from typing import Any, Optional, Union
-from urllib.parse import ParseResult, urljoin, urlparse
+from urllib.parse import ParseResult, urljoin, urlparse, quote
 
 class HtmlToDiscord:
     url: str
@@ -99,10 +99,16 @@ class HtmlToDiscord:
     
     @staticmethod
     def size_and_src(img: Tag) -> tuple[int, str]:
-        
-        size = 0
         src = img.attrs.get("src")
-        for attr in ("data-image-width", "data-width", "width", "data-image-height", "data-height", "height"):
+        size = 0
+        w = int(img.attrs.get("data-file-width", "0"))
+        h = int(img.attrs.get("data-file-height", "0"))
+        ratio = w / h
+        if ratio > 0.8 and ratio < 1.2:
+          return 1000, src
+        return h, src
+        
+        for attr in ("data-file-width", "data-width", "width", "data-file-height", "data-height", "height"):
             val = img.attrs.get(attr)
             if not val: continue
             size = int(val)
@@ -118,10 +124,10 @@ class HtmlToDiscord:
     @property
     def thumbnail(self) -> str:
         if self._thumbnail is None:
-            img_tags = self.doc.select('img.thumbnail')
+            img_tags = self.doc.select('img[data-file-width]:not([alt^="Page"])[srcset]')
             if not img_tags:
                 img_tags = self.doc.select(
-                            'img'
+                            'img:not([alt^="Page"]):not([alt=""])'
                            )
             if img_tags:
                 ordered = sorted(list(
@@ -163,7 +169,7 @@ class Wiki(commands.Cog):
     def _url_from_search(self, name) -> str:
         result_page = HtmlToDiscord(
             requests.get(
-                f"https://en.m.wikipedia.org/w/index.php?search={name.replace(' ', '+')}&title=Special%3ASearch&profile=default&fulltext=1&ns0=1boost-template=1&prefer-recent=1"
+                f"https://en.m.wikipedia.org/w/index.php?search={quote(name)}&title=Special%3ASearch&profile=default&fulltext=1&ns0=1boost-template=1&prefer-recent=1"
             ).content
         )
         wiki_url = HtmlToDiscord.abs_url(

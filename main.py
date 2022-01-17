@@ -29,8 +29,16 @@ class Phebe(commands.Cog):
     async def on_ready(self):
         """show message when bot gets online"""
         print(Fore.BLUE + f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms')
-        await bot.change_presence(status=disnake.Status.idle ,activity=disnake.Game(name=".help"))
-    
+        self.bot.loop.create_task(self.status_task())
+        
+    async def status_task(self):
+        while True:
+            for activity in (disnake.Game(name=".help"),
+                            disnake.Activity(type=disnake.ActivityType.watching, name="Members in Servers"),
+                            disnake.Activity(type=disnake.ActivityType.listening, name="Moderation team command.")):
+                await self.bot.change_presence(activity=activity)
+                await asyncio.sleep(10)
+
     @commands.command()  # umm do you want it green the green is too dark can you lighten it up dude it doesn't send it at discord so any color is ok
     async def ping(self, ctx):  # then why do we need color in the first place, to make it cool lol
         """show latency in mili seconds"""       
