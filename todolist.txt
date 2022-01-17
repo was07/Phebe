@@ -3,4 +3,4 @@
 moderation
 fun stuff
 docs access (complete)
-resources 
+resources [website + gathering]

@@ -13,8 +13,11 @@ from init import Formatted
 import asyncio
 import StayAlive
 import getdoc
+import colorama
+from colorama import Fore
+#wait
 
-
+# do we really need the bot is running to be colored - ok
 class Phebe(commands.Cog):
     """
     Official bot for the Pythonic Hangout server
@@ -25,16 +28,13 @@ class Phebe(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         """show message when bot gets online"""
-        print('+ Bot is running!')
+        print(Fore.BLUE + f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms')
+        await bot.change_presence(status=disnake.Status.idle ,activity=disnake.Game(name=".help"))
     
-    ## ping and ban-warn-timeout
-
-    @commands.command()
-    async def ping(self, ctx):
-        """show latency in mili seconds"""
-        latency = self.bot.latency * 1000
-        await ctx.send(
-            embed=disnake.Embed(title='Pong!', description=f"{latency} ms"))
+    @commands.command()  # umm do you want it green the green is too dark can you lighten it up dude it doesn't send it at discord so any color is ok
+    async def ping(self, ctx):  # then why do we need color in the first place, to make it cool lol
+        """show latency in mili seconds"""       
+        await ctx.send(embed=disnake.Embed(title='Pong!', description=f"🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms")) 
     
     @commands.command()
     async def warn(self, ctx, member: disnake.Member):

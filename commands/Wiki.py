@@ -99,14 +99,7 @@ class HtmlToDiscord:
     
     @staticmethod
     def size_and_src(img: Tag) -> tuple[int, str]:
-        if "srcset" in img.attrs:
-            srcsets = img.attrs["srcset"].split(",")
-            for srcset in srcsets:
-                src, size_str, *_ = srcset.split()
-                sizem = re.search("^(\\d+)", size_str)
-                if sizem:
-                    size = int(sizem.group(1))
-                    return size, src
+        
         size = 0
         src = img.attrs.get("src")
         for attr in ("data-image-width", "data-width", "width", "data-image-height", "data-height", "height"):
@@ -125,15 +118,15 @@ class HtmlToDiscord:
     @property
     def thumbnail(self) -> str:
         if self._thumbnail is None:
-            img_tags = self.doc.select('.infobox-image img')
+            img_tags = self.doc.select('img.thumbnail')
             if not img_tags:
                 img_tags = self.doc.select(
-                            'img:not([src*=".svg"])'
+                            'img'
                            )
             if img_tags:
-                ordered = list(
+                ordered = sorted(list(
                     map(HtmlToDiscord.size_and_src, img_tags)
-                )
+                ), key=lambda i:i[0])
                 size, src = ordered[-1]
                 url = HtmlToDiscord.abs_url(self.url, src)
                 self._thumbnail = url
