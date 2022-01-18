@@ -128,12 +128,13 @@ if __name__ == "__main__":
     t = Thread(target=StayAlive.start_server)
     t.start()
     
-    try:
+    while True:
+      try:
         bot.run(
             os.getenv("Token") or 
             __import__("dotenv").get_key(dotenv_path=".env", key_to_get="Token")
         )
-    except disnake.errors.HTTPException as e:
+      except disnake.errors.HTTPException as e:
         import traceback, sys, os
         traceback.print_exc(999, sys.stderr, True)
         import concurrent.futures, threading
