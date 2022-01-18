@@ -12,6 +12,7 @@ bs4 = "^0.0.1"
 sphobjinv = "^2.1"
 disnake = "^2.3.0"
 colorama = "^0.4.4"
+furl = "^2.1.2"
 
 [tool.poetry.dev-dependencies]
 
