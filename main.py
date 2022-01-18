@@ -4,7 +4,12 @@ A discord bot for the Python Experts Server
 """
 import disnake 
 from disnake.ext import commands
-
+import logging, sys
+l = logging.getLogger("disnake.client")
+l.setLevel(logging.DEBUG)
+logging.root.setLevel(logging.DEBUG)
+l.addHandler(logging.StreamHandler(sys.stderr))
+logging.root.addHandler(logging.StreamHandler(sys.stderr))
 from pathlib import Path
 import os 
 from threading import Thread
@@ -123,8 +128,16 @@ if __name__ == "__main__":
     t = Thread(target=StayAlive.start_server)
     t.start()
     
-    while True:
+    try:
         bot.run(
             os.getenv("Token") or 
             __import__("dotenv").get_key(dotenv_path=".env", key_to_get="Token")
         )
+    except disnake.errors.HTTPException as e:
+        import traceback, sys, os
+        traceback.print_exc(999, sys.stderr, True)
+        import concurrent.futures, threading
+        try:
+            threading_.shutdoen()
+        finally:
+            os._exit(255)

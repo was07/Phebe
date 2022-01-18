@@ -12,7 +12,7 @@ from furl import furl as URL
 from enum import Enum
 from typing import Callable, TypeVar
 
-TFunc = TypeVar("TFunc", bound=Callable[[...],Any])
+TFunc = TypeVar("TFunc", bound=Callable)
 
 def cache(func: TFunc) -> TFunc:
     return lru_cache(maxsize=0)(func)
@@ -306,7 +306,11 @@ class Wiki(commands.Cog):
             return Embed(
                 description=f"No results found for {name!r}"
             )
-        result = results[0]
+        best = [r for r in results if re.subn("[^a-z]+", "", r.title.split("(")[0].strip().lower())[0] == re.subn("[^a-z]+", "", name.split("(")[0].strip().lower())[0]]
+        if best:
+            result = best[0]
+        else:
+            result = results[0]
         title, url = result.title, result.url
         response = requests.get(url.url)
     
@@ -327,13 +331,13 @@ class Wiki(commands.Cog):
         if images:
             thumbnail = images[0].href.url
         else:
-            thumbnail = "https://upload.wikimedia.org"
+            thumbnail =  (
+                "https://upload.wikimedia.org"
                 "/wikipedia/commons/thumb/d/de"
                 "/Wikipedia_Logo_1.0.png"
                 "/768px-Wikipedia_Logo_1.0.png"
-        
+            )
         conv = HtmlToDiscord(html)
-        conv.doc.select("[class*=\"info*box")
         paras = conv.doc.select(
             "#mf-section-0 > p:not(.mw-empty-elt)"
         )
