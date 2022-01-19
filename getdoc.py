@@ -3,7 +3,7 @@ import requests
 import functools
 from itertools import islice
 from typing import Optional, TypeVar
-from base_utils import Formatted
+from init import Formatted
 from sphobjinv.inventory import Inventory
 from sphobjinv.data import DataObjStr
 from bs4 import BeautifulSoup as BS
@@ -11,16 +11,37 @@ from bs4.element import Tag
 
 HtmlStr = TypeVar("HtmlStr", bound = str)
 Url = TypeVar("Url", bound = str)
+invs = {}
+
+@functools.lru_cache(maxsize=0)
+def get_intersphinx_mapping():
+  return {
+    "python": "https://docs.python.org/3/",
+    "python-dev": "https://docs.python.org/dev/",
+    "pyspark": "https://spark.apache.org/docs/latest/api/python/",
+    "disnake": "https://docs.disnake.dev/en/latest/",
+    "requests": "https://docs.python-requests.org/en/latest/",
+    "requests-2": "http://requests.readthedocs.org/en/latest/",
+    "numpy": "https://numpydoc.readthedocs.io/en/latest/",
+    "numba": "https://numba.pydata.org/numba-doc/latest/",
+    "dpy": "https://discordpy.readthedocs.org/en/latest/",
+  }
 
 @functools.lru_cache(maxsize=0)
 def getinv() -> Inventory:
-   inv = Inventory("objects.inv")
-   lines = inv.data_file().splitlines()
-   pts = [
+  global invs
+  if invs:
+    return invs
+  for ns, url in get_intersphinx_mapping().items():
+    inv_url = f"{url.rstrip('/')}/objects.inv"
+    print(f"Reading {inv_url}")
+    inv = Inventory(url=inv_url)
+    lines = inv.data_file().splitlines()
+    pts = [
        ln.replace(".$","").replace("-$","").split()
        for ln in map(bytes.decode, lines)
-   ]
-   lookup = {
+    ]
+    lookup = {
        p[0]:DataObjStr(
            *[
                *p[0:1],
@@ -32,11 +53,12 @@ def getinv() -> Inventory:
        for p in pts
        if len(p) > 1
        and p[0] != "#"
-   }
-   lookup.update({ p.name: p for p in inv.objects })
-   inv.objects.clear()
-   inv.objects.extend(list(lookup.values()))
-   return inv
+    }
+    lookup.update({ p.name: p for p in inv.objects })
+    inv.objects.clear()
+    inv.objects.extend(list(lookup.values()))
+    invs[url] = inv
+  return invs
 
 @functools.lru_cache(maxsize=0)
 def gethtml(url: Url) -> str:
@@ -53,23 +75,27 @@ def gethtml(url: Url) -> str:
 
 @functools.lru_cache(maxsize=0)
 def getitem(symbol: str) -> Optional[DataObjStr]:
-    inv = getinv()
+  for url, inv in getinv().items():
     items = (o for o in inv.objects if symbol == o.name)
-    for item in items: return item
-    items = (
-        o for o in inv.objects 
-        if symbol in o.name.split(".")
-    )
-    for item in items: return item
+    for item in items: return (url,item)
+  
+  for url, inv in getinv().items():
     items = (
         o for o in inv.objects
         if symbol.split(".")[0] == o.name.split(".")[0]
     )
-    for item in items: return item
-    return None
+    for item in items: return (url,item)
+  
+  for url, inv in getinv().items():
+    items = (
+        o for o in inv.objects 
+        if symbol in o.name.split(".")
+    )
+    for item in items: return (url,item)
+  return None,None
 
 
-def geturl(item: Optional[DataObjStr]) -> Optional[Url]:
+def geturl(url, item: Optional[DataObjStr]) -> Optional[Url]:
     if not item:
         return None
     uri = item.uri
@@ -86,16 +112,15 @@ def geturl(item: Optional[DataObjStr]) -> Optional[Url]:
     
     print(repr(item))
     return (
-        f"https://docs.python.org/3/{uri}"
+        f"{url}/{uri}"
     )
 
 def getdoc(
     symbol: str,
     nparas: int=1
 ) -> tuple[str, Formatted, Url]:
-    item: Optional[DataObjStr] = getitem(symbol)
-    
-    url: Optional[Url] = geturl(item)
+    url, item = getitem(symbol)
+    url: Optional[Url] = geturl(url, item)
     id_or_href = item.uri.split("#")[-1].replace("$", item.name)
     html: HtmlStr = gethtml(url) if url else None
     doc: BS = BS(html or "")
