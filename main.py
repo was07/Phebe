@@ -4,12 +4,14 @@ A discord bot for the Python Experts Server
 """
 import disnake 
 from disnake.ext import commands
+
 import logging, sys
 l = logging.getLogger("disnake.client")
 l.setLevel(logging.DEBUG)
 logging.root.setLevel(logging.DEBUG)
 l.addHandler(logging.StreamHandler(sys.stderr))
 logging.root.addHandler(logging.StreamHandler(sys.stderr))
+
 from pathlib import Path
 import os 
 from threading import Thread
