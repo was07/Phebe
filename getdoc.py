@@ -1,3 +1,5 @@
+import aiohttp
+import asyncio
 import re
 import requests
 import functools
@@ -13,9 +15,8 @@ HtmlStr = TypeVar("HtmlStr", bound = str)
 Url = TypeVar("Url", bound = str)
 invs = {}
 
-@functools.lru_cache(maxsize=0)
-def get_intersphinx_mapping():
-  return {
+async def get_all_invs():
+  mapping = {
     "python": "https://docs.python.org/3/",
     "python-dev": "https://docs.python.org/dev/",
     "pyspark": "https://spark.apache.org/docs/latest/api/python/",
@@ -23,19 +24,28 @@ def get_intersphinx_mapping():
     "requests": "https://docs.python-requests.org/en/latest/",
     "requests-2": "http://requests.readthedocs.org/en/latest/",
     "numpy": "https://numpydoc.readthedocs.io/en/latest/",
-    "numba": "https://numba.pydata.org/numba-doc/latest/",
     "dpy": "https://discordpy.readthedocs.org/en/latest/",
   }
+  coros = [get_inv(url) for ns, url in mapping.items()]
+  results = await asyncio.gather(*coros)
+  return dict(results)
+
+async def get_inv(url):
+  print(f"Loading {url.rstrip('/')}/objects.inv")
+  async with aiohttp.ClientSession() as session:
+    async with session.get(f"{url.rstrip('/')}/objects.inv") as resp:
+      inv = Inventory()
+      inv._try_import(inv._import_zlib_bytes, await resp.read(), [])
+      return (url, inv)
 
 @functools.lru_cache(maxsize=0)
 def getinv() -> Inventory:
   global invs
   if invs:
     return invs
-  for ns, url in get_intersphinx_mapping().items():
-    inv_url = f"{url.rstrip('/')}/objects.inv"
-    print(f"Reading {inv_url}")
-    inv = Inventory(url=inv_url)
+  invs.update(asyncio.run(get_all_invs()))
+  
+  for url, inv in invs.items():
     lines = inv.data_file().splitlines()
     pts = [
        ln.replace(".$","").replace("-$","").split()
@@ -199,3 +209,4 @@ def getdoc(
         ),
         url
   )
+	
