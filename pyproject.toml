@@ -13,6 +13,9 @@ sphobjinv = "^2.1"
 disnake = "^2.3.0"
 colorama = "^0.4.4"
 furl = "^2.1.2"
+base_utils = "^1.0.14"
+aiohttp = "^3.8.1"
+nest-asyncio = "^1.5.4"
 
 [tool.poetry.dev-dependencies]
 
