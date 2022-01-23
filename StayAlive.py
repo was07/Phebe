@@ -1,8 +1,6 @@
-from flask import request, Flask
+from flask import Flask
 from threading import Thread
 from time import sleep
-import os
-import sys
 app = Flask("")
 
 @app.route("/")

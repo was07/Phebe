@@ -1,4 +1,3 @@
-
 class FakeStream(__import__("io").StringIO):
   
   def fileno(self):

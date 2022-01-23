@@ -1,30 +1,28 @@
 """
 Phebe
-A discord bot for the Python Experts Server
+A discord bot for the Pythonic Hangouts Server
 """
 import disnake 
 from disnake.ext import commands
 
-import logging, sys
-l = logging.getLogger("disnake.client")
-l.setLevel(logging.DEBUG)
+import logging
+import sys
+import os 
+
+logger = logging.getLogger("disnake.client")
+logger.setLevel(logging.DEBUG)
 logging.root.setLevel(logging.DEBUG)
-l.addHandler(logging.StreamHandler(sys.stderr))
+logger.addHandler(logging.StreamHandler(sys.stderr))
 logging.root.addHandler(logging.StreamHandler(sys.stderr))
 
 from pathlib import Path
-import os 
 from threading import Thread
-import requests
-from init import Formatted
 import asyncio
 import StayAlive
-import getdoc
-import colorama
-from colorama import Fore
-#wait
 
-# do we really need the bot is running to be colored - ok
+from colorama import Fore
+
+
 class Phebe(commands.Cog):
     """
     Official bot for the Pythonic Hangout server
@@ -120,6 +118,7 @@ if __name__ == "__main__":
             intents=intents,
         )
     bot.add_cog(Phebe(bot))
+    
     dir: Path = Path("commands")
     for item in dir.iterdir():
         if item.name.endswith(".py"):
@@ -131,16 +130,16 @@ if __name__ == "__main__":
     t.start()
     
     while True:
-      try:
-        bot.run(
-            os.getenv("Token") or 
-            __import__("dotenv").get_key(dotenv_path=".env", key_to_get="Token")
-        )
-      except disnake.errors.HTTPException as e:
-        import traceback, sys, os
-        traceback.print_exc(999, sys.stderr, True)
-        import concurrent.futures, threading
         try:
-            threading_.shutdoen()
-        finally:
-            os._exit(255)
+            bot.run(
+                os.getenv("Token") or 
+                __import__("dotenv").get_key(dotenv_path=".env", key_to_get="Token")
+            )
+        except disnake.errors.HTTPException:
+            import traceback, sys, os
+            traceback.print_exc(999, sys.stderr, True)
+            import threading
+            try:
+                threading.shutdown()
+            finally:
+                os._exit(255)
