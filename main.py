@@ -1,25 +1,22 @@
 """
 Phebe
-A discord bot for the Pythonic Hangouts Server
+A discord bot for the Python Experts Server
 """
 import disnake 
 from disnake.ext import commands
 
-import logging
-import sys
-import os 
-
-logger = logging.getLogger("disnake.client")
-logger.setLevel(logging.DEBUG)
+import logging, sys
+l = logging.getLogger("disnake.client")
+l.setLevel(logging.DEBUG)
 logging.root.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler(sys.stderr))
+l.addHandler(logging.StreamHandler(sys.stderr))
 logging.root.addHandler(logging.StreamHandler(sys.stderr))
 
 from pathlib import Path
+import os 
 from threading import Thread
 import asyncio
 import StayAlive
-
 from colorama import Fore
 
 
@@ -118,7 +115,6 @@ if __name__ == "__main__":
             intents=intents,
         )
     bot.add_cog(Phebe(bot))
-    
     dir: Path = Path("commands")
     for item in dir.iterdir():
         if item.name.endswith(".py"):
@@ -130,16 +126,16 @@ if __name__ == "__main__":
     t.start()
     
     while True:
+      try:
+        bot.run(
+            os.getenv("Token") or 
+            __import__("dotenv").get_key(dotenv_path=".env", key_to_get="Token")
+        )
+      except disnake.errors.HTTPException:
+        import traceback, sys, os
+        traceback.print_exc(999, sys.stderr, True)
+        import threading
         try:
-            bot.run(
-                os.getenv("Token") or 
-                __import__("dotenv").get_key(dotenv_path=".env", key_to_get="Token")
-            )
-        except disnake.errors.HTTPException:
-            import traceback, sys, os
-            traceback.print_exc(999, sys.stderr, True)
-            import threading
-            try:
-                threading.shutdown()
-            finally:
-                os._exit(255)
+            threading.shutdown()
+        finally:
+            os._exit(255)
