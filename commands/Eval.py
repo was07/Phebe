@@ -14,6 +14,9 @@ class Eval(commands.Cog):
     @commands.command()
     async def e(self, ctx, *, source: str=""):
         """Run and get output of a python code"""
+        if ctx.author.id == 883987539961192508:  # 00001H
+            await ctx.reply("Sorry, Eval is not available, **for you.**")
+            return
         
         result: Any
         code: CodeType
