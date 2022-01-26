@@ -5,9 +5,9 @@ app = Flask("")
 
 @app.route("/")
 def index():
-  #bot = sys.modules["__main__"].bot
-  #bot.run(os.getenv('Token'))
-  return '<div style="color: green; font-size: 40px">Bot is awake.</div>'
+  return """
+  <div style="color: green; font-size: 40px">Bot is awake.</div>
+  """
 
 
 def start_server():

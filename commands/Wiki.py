@@ -69,13 +69,12 @@ class WikiImageResult(NamedTuple):
     filename: str
 
 @cache
-def search_wiki(
-    query: str,
-    *,
-    profile: WikiProfile=WikiProfile.NORMAL,
-    redirects: WikiRedirectMode=WikiRedirectMode.RESOLVE,
-    max_results: int=10,
-) -> list[WikiSearchResult]:
+def search_wiki(query: str,
+                *,
+                profile: WikiProfile=WikiProfile.NORMAL,
+                redirects: WikiRedirectMode=WikiRedirectMode.RESOLVE,
+                max_results: int=10,) -> list[WikiSearchResult]:
+
     wiki_api_url: URL = URL(
         "http://en.wikipedia.org/w/api.php"
     )
@@ -109,11 +108,10 @@ def search_wiki(
     ]
 
 @cache
-def get_wiki_images(
-    result: WikiSearchResult,
-    *,
-    min_results: int=1,
-) -> list[WikiImageResult]:
+def get_wiki_images(result: WikiSearchResult,
+                    *,
+                    min_results: int=1) -> list[WikiImageResult]:
+
     wiki_api_url: URL = URL(
         "http://en.wikipedia.org/w/api.php"
     )
@@ -360,7 +358,6 @@ class Wiki(commands.Cog):
                 "/commons/thumb/2/2c"
                 "/Tango_style_Wikipedia_Icon.svg"
                 "/1200px-Tango_style_Wikipedia_Icon.svg.png",
-        ) # icon can be the icon of wikipedia
+        )
         embed.set_thumbnail(url=thumbnail)
         return embed
-

@@ -25,4 +25,3 @@ def setup(bot: commands.Bot):
     print(f"Loading extension comand: {class_name} ...", end="")
     bot.add_cog(cog_obj)
     print(f"OK: {cog_obj}")
-    

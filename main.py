@@ -39,21 +39,17 @@ class Phebe(commands.Cog):
     async def status_task(self):
         while True:
             for activity in (disnake.Game(name=".help"),
-                             disnake.Activity(
-                                 type=disnake.ActivityType.watching,
-                                 name="Members in Servers"),
-                             disnake.Activity(
-                                 type=disnake.ActivityType.listening,
-                                 name="Moderation team command.")):
+                             disnake.Activity(type=disnake.ActivityType.watching,
+                                              name="Members in Servers"),
+                             disnake.Activity(type=disnake.ActivityType.listening,
+                                              name="Moderation team command.")
+                                              ):
                 await self.bot.change_presence(activity=activity)
                 await asyncio.sleep(10)
 
-    @commands.command(
-    )  # umm do you want it green the green is too dark can you lighten it up dude it doesn't send it at discord so any color is ok
-    async def ping(
-        self, ctx
-    ):  # then why do we need color in the first place, to make it cool lol
-        """show latency in mili seconds"""
+    @commands.command()
+    async def ping(self, ctx):
+        """Show latency in mili seconds"""
         await ctx.send(embed=disnake.Embed(
             title='Pong!',
             description=f"🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms")
@@ -61,12 +57,12 @@ class Phebe(commands.Cog):
 
     @commands.command()
     async def warn(self, ctx, member: disnake.Member):
-        """warn a User"""
+        """Warn a User"""
         await ctx.send(f"{member: disnake.Member} has been warned")
 
     @commands.command()
     async def timeout(self, ctx, time, member: disnake.Member = None):
-        """timeout a User"""
+        """Timeout a User"""
         await member.timeout(duration=time)
 
     # meeting command
@@ -85,7 +81,7 @@ class Phebe(commands.Cog):
 
     @commands.command()
     async def pfp(self, ctx, member: disnake.Member = None):
-        """show pfp of user"""
+        """Show profile picture of a user, or see yours"""
 
         embed = disnake.Embed(
             title=
@@ -98,17 +94,19 @@ class Phebe(commands.Cog):
 
     @commands.command()
     async def flip(self, ctx):
-        """flip a coin"""
+        """Flip a vertual coin and get the result"""
         heads_url = "https://cdn-icons.flaticon.com/png/512/5700/premium/5700963.png?token=exp=1643128433~hmac=831aba311ab86e1ef73059e55178e712"
         tails_url = "https://cdn-icons.flaticon.com/png/512/2173/premium/2173470.png?token=exp=1643127144~hmac=a622b3080fe202709c7745ac894df97b"
 
         res = random.randint(1, 2)
 
-        embed = disnake.Embed(title=f'Flipped a coin', description=f"**{('Heads' if res == 1 else 'Tails')}**")
+        embed = disnake.Embed(
+            title=f'Flipped a coin',
+            description=f"**{('Heads' if res == 1 else 'Tails')}**")
         embed.set_thumbnail(heads_url if res == 1 else tails_url)
 
         await ctx.reply(embed=embed)
-
+    
     @commands.command()
     async def format(self, ctx):
         await ctx.send(embed=disnake.Embed(title='Code formatting',
@@ -117,9 +115,7 @@ class Phebe(commands.Cog):
 
 \\`\\`\\`py
 print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They are often under the Escape (esc) key on most keyboard orientations, they could be towards the right side of the keyboard if you are using eastern european/balkan language keyboards.
-
-This will result in proper syntax highlighting which makes it easier to see your code."""
-                                           ))
+"""))
 
 
 async def runserver():

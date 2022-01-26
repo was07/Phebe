@@ -49,7 +49,7 @@ class Eval(commands.Cog):
                   f"{len(stdout)} characters):",
                   f"```\n{stdout_truncated}\n```"
                 )))
-            outcome = "successfully" if rs == 0 else "abnormally" 
+            outcome = "successfully" if rs == 0 else "unsuccessfully" 
             if not stderr and not stdout:
                 output.append(f"Program {outcome} completed with exit status {rs} and produced no output.")
             else:

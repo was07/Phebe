@@ -1,21 +1,24 @@
 from base import *
-import re, requests
+import re
+import requests
 
 
 class PyPi(commands.Cog):
     def __init__(self, bot: Bot) -> None:
         super().__init__()
         self.bot = bot
-   
+    
     @commands.command(alias="pypi")
     async def pypi(self, ctx, name=None):
         if name is None:
             await ctx.send('Package name required.')
             return
+
         resp = requests.get("https://pypi.org/pypi/" + name + "/json")
         if resp.status_code == 404:
-            await ctx.send("No such thing")
+            await ctx.send(embed=disnake.Embed(title=f"Could not find {name}"))
             return
+        
         data = resp.json()
         info = data['info']
         url = info['project_url']
@@ -31,7 +34,7 @@ class PyPi(commands.Cog):
 
 
 
-def format(text, lines=10):
+def format(text, lines=6):
     res = ""
     text = re.compile(
       r'\s*</?(?:(?!\n[\n\r#]).)*>\s*',
@@ -65,5 +68,6 @@ def format(text, lines=10):
             if '__start_py' in res and '```' not in res:
                 res += '```'
                 break 
+    
     res = res.replace('__start_py', '```py')
     return res.rstrip() + ' ...'
