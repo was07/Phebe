@@ -16,12 +16,8 @@ furl = "^2.1.2"
 base_utils = "^1.0.14"
 aiohttp = "^3.8.1"
 nest-asyncio = "^1.5.4"
-
-[tool.poetry.dev-dependencies]
+websockets = "^10.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.pyflakes]
-ignore = ["F403"]

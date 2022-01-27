@@ -8,10 +8,9 @@ from disnake.ext import commands
 import logging, sys
 
 l = logging.getLogger("disnake.client")
-l.setLevel(logging.DEBUG)
-logging.root.setLevel(logging.DEBUG)
-l.addHandler(logging.StreamHandler(sys.stderr))
-logging.root.addHandler(logging.StreamHandler(sys.stderr))
+l.setLevel(logging.INFO)
+logging.root.setLevel(logging.INFO)
+# logging.root.addHandler(logging.StreamHandler(sys.stderr))
 
 from pathlib import Path
 import os

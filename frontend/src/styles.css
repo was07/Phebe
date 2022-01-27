@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1 {
+  @apply font-semibold text-4xl;
+}
+
+button {
+  @apply rounded-md bg-white p-2 px-3 text-black text-sm font-semibold;
+}
+
+a {
+  @apply text-blue-500 underline;
+}
+
+.center {
+  @apply absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -60%);
+  transform: translate(-50%, -60%);
+}

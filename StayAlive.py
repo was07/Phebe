@@ -1,14 +1,92 @@
-from flask import Flask
+from flask import Flask, Response, Request, jsonify, request
+
 from threading import Thread
 from time import sleep
+import logging
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+
+
 app = Flask("")
 
+import inspect
 @app.route("/")
 def index():
-  return """
-  <div style="color: green; font-size: 40px">Bot is awake.</div>
-  """
+    return """
+<style>
+    :root {
+        background: rgb(0, 0, 0);
+        font-family: sans-serif;
+        background-image: linear-gradient(to right, rgb(0, 65, 55), rgb(0, 22, 48));
+    }
+    .container {
+        height: 100%; width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .main {
+        text-align: left;
+        color: rgb(82, 220, 224);
+        font-size: 40px;
+    }
+    .main:hover {
+        color: rgb(116, 234, 255);
+        cursor: pointer;
+    }
+</style>
+<div class="container">
+    <div class="main">Bot is awake.</div>
+</div>
+    """
 
+def log_request(the_request):
+    for k, v in inspect.getmembers(the_request):
+        try:
+            log.info("%s=%s", k, v)
+        except Exception as e:
+            log.info("%s=%s", k, type(v).__qualname__)
+    
+@app.route("/api", methods=['GET'])
+def api():
+    log_request(request)
+    import requests
+    import json, asyncio
+    wwebsockets = __import__("websockets")
+    el = asyncio.get_event_loop_policy().get_event_loop()
+    wsc = el.run_until_complete(websockets.connect("wss://gateway.discord.gg/?v=9&encoding=json"))
+    print(wsc)
+    el.run_until_complete(wsc.send(json.dumps(dat := (
+        {
+            "op": 2,
+            "d": {
+                "token": request.json()['token'],
+                "intents": 513,
+                "properties": {
+                    "$os": "linux", "$browser": "my_library", "$device": "my_library"
+                }
+            }
+        } 
+    ))))
+    raw = el.run_until_complete(wsc.recv())
+    data = json.loads(raw)
+    print(data)
+    return jsonify(dat)
+
+@app.route("/api/lpgin", methods=['GET', 'POST'])
+def login():
+    log_request(request)
+    return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+
+@app.route("/login/service/discord/callback", methods=['GET', 'POST'])
+def discord_callback():
+    log_request(request)
+    return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+
+@app.route("/api/interactions", methods=['GET','POST'])
+def interact():
+    log_request(request)
+    return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
 
 def start_server():
   if is_server_running():
