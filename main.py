@@ -20,6 +20,9 @@ import asyncio
 import StayAlive
 from colorama import Fore
 
+fwords = ["@everyone", "@here"]
+
+
 
 class Phebe(commands.Cog):
     """
@@ -34,6 +37,22 @@ class Phebe(commands.Cog):
         print(Fore.BLUE +
               f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms')
         self.bot.loop.create_task(self.status_task())
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        role = disnake.utils.get(message.guild.roles, name="Moderation-Team")
+        if role in message.author.roles:
+            return
+        for word in fwords:
+            if word in message.content.lower():
+                await message.delete()
+                await message.author.send(
+                    embed=disnake.Embed(
+                        title='Warning',
+                        description=f"**Your message got deleted by saying** *{word}* __that is a banned word.__")
+                    )
+        await bot.process_commands(message)
+			#IndentationError
 
     async def status_task(self):
         while True:
@@ -45,13 +64,14 @@ class Phebe(commands.Cog):
                                               ):
                 await self.bot.change_presence(activity=activity)
                 await asyncio.sleep(10)
-
+    
     @commands.command()
     async def ping(self, ctx):
         """Show latency in mili seconds"""
         await ctx.send(embed=disnake.Embed(
             title='Pong!',
-            description=f"🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms")
+            description=f"🟢 **Bot is active**\n\n"
+                        f"🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms")
                        )
 
     @commands.command()
@@ -63,7 +83,7 @@ class Phebe(commands.Cog):
     async def timeout(self, ctx, time, member: disnake.Member = None):
         """Timeout a User"""
         await member.timeout(duration=time)
-
+    
     # meeting command
     # @commands.command()
     # @commands.has_role("Moderation Team")
