@@ -20,7 +20,7 @@ import asyncio
 import StayAlive
 from colorama import Fore
 
-fwords = ["@everyone", "@here"]
+banned_words = ["@everyone", "@here"]
 
 
 
@@ -43,7 +43,7 @@ class Phebe(commands.Cog):
         role = disnake.utils.get(message.guild.roles, name="Moderation-Team")
         if role in message.author.roles:
             return
-        for word in fwords:
+        for word in banned_words:
             if word in message.content.lower():
                 await message.delete()
                 await message.author.send(
