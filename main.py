@@ -51,8 +51,6 @@ class Phebe(commands.Cog):
                         title='Warning',
                         description=f"**Your message got deleted by saying** *{word}* __that is a banned word.__")
                     )
-        await bot.process_commands(message)
-			#IndentationError
 
     async def status_task(self):
         while True:
