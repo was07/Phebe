@@ -123,7 +123,16 @@ class Phebe(commands.Cog):
         embed.set_thumbnail(heads_url if res == 1 else tails_url)
 
         await ctx.reply(embed=embed)
-    
+
+    @commands.command()
+    async def roll(self, ctx):
+        """roll a virtual dice and get the result"""
+        comp = random.randint(1,6)
+
+        await ctx.reply(embed=disnake.Embed(
+            title="Rolled a dice", description=f"Result is {comp}"
+        ))
+
     @commands.command()
     async def format(self, ctx):
         await ctx.send(embed=disnake.Embed(title='Code formatting',

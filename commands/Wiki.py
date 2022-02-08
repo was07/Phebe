@@ -62,7 +62,7 @@ class WikiImageResult(NamedTuple):
     pageid: str
     ns: int
     title: str
-    images: list[dict[str,Union[int,str]]]
+    images: list
     image_title: str
     href: URL
     scheme: str
