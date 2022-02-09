@@ -22,6 +22,20 @@ from colorama import Fore
 
 banned_words = ["@everyone", "@here"]
 
+hlp = {
+    "Python": {
+        "d (symbol)": "Get the Python documentation for a given symble",
+        "e (code)": "Evaluate or run Python code and see output",
+        "pypi (name)": "Get the description of a pip module"
+    },
+    "Server": {
+        "rule (number)": "Get a specific rule of the server",
+        "serverinfo": "Get some information about the server"
+    },
+    "More": {
+        "wiki (subject)": "Get the Wikipedia page of a subject"
+    }
+}
 
 
 class Phebe(commands.Cog):
@@ -132,16 +146,28 @@ class Phebe(commands.Cog):
         await ctx.reply(embed=disnake.Embed(
             title="Rolled a dice", description=f"Result is {comp}"
         ))
-
+    
+    @commands.command()
+    async def help(self, ctx):
+        embed=disnake.Embed(title="Available commands")
+        for type_, cmds in hlp.items():
+            txt = ""
+            for cmd, about in cmds.items():
+                txt += f"`{self.bot.command_prefix}{cmd}`\n{about}\n\n"
+            embed.add_field(name=type_, value=txt)
+        await ctx.send(embed=embed)
+    
     @commands.command()
     async def format(self, ctx):
         await ctx.send(embed=disnake.Embed(title='Code formatting',
-                                           description="""
+                                           ddescription="""
 		To properly format Python code in Discord, write your code like this:
 
 \\`\\`\\`py
 print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They are often under the Escape (esc) key on most keyboard orientations, they could be towards the right side of the keyboard if you are using eastern european/balkan language keyboards.
 """))
+
+
 
 
 async def runserver():
@@ -162,6 +188,7 @@ if __name__ == "__main__":
             command_prefix=".",
             description=Phebe.__doc__,
             intents=intents,
+            help_command=None
         )
     except:
         intents.presences = False
@@ -169,8 +196,10 @@ if __name__ == "__main__":
             command_prefix=".",
             description=Phebe.__doc__,
             intents=intents,
+            help_command=None
         )
     bot.add_cog(Phebe(bot))
+    
     dir: Path = Path("commands")
     for item in dir.iterdir():
         if item.name.endswith(".py"):
