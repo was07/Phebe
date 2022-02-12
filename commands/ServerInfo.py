@@ -12,15 +12,14 @@ import socket
 def get_lan_ip():
     s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
-    lan_ip = s.getsockname()[0]
-    return lan_ip
+    return s.getsockname()[0]
 
 def safe_limit(s: Union[str,bytes]) -> str:
     if isinstance(s, bytes):
         s = s.decode()
     if len(s) >= 255:
         trailer = " ..."
-        return s[0: 255] + trailer
+        return s[:255] + trailer
     if len(s) == 0:
         s = "\u200B"
     return s

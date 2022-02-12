@@ -7,7 +7,7 @@ class Ban(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    @commands.has_permissions(ban_members = True)
+    @commands.has_permissions(ban_members=True)
     async def ban(self, ctx: Context, member: Member, *, reason="No reason provided."):
         """Ban a User"""
         try:
@@ -17,10 +17,10 @@ class Ban(commands.Cog):
         finally:
             await member.ban(reason=reason)
             await ctx.send(f"**{member.name}** got banned successfully!")
-    
+
     @commands.command()
-    @commands.has_permissions(ban_members = True, )
-    async def unban(self, ctx: Context, member: int =0, *, reason="No reason provided."):
+    @commands.has_permissions(ban_members=True, )
+    async def unban(self, ctx: Context, member: int = 0, *, reason="No reason provided."):
         """Unban a User"""
         banned_users = await ctx.guild.bans()
 

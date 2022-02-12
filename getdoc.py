@@ -47,7 +47,6 @@ def getinv() -> Inventory:
   if invs:
     return invs
   invs.update(asyncio.run(get_all_invs()))
-  
   for url, inv in invs.items():
     lines = inv.data_file().splitlines()
     pts = [
@@ -55,17 +54,8 @@ def getinv() -> Inventory:
        for ln in map(bytes.decode, lines)
     ]
     lookup = {
-       p[0]:DataObjStr(
-           *[
-               *p[0:1],
-               *p[1].split(":"),
-               *(p[2:4] + [p[0]]),
-               p[0]
-           ]
-       )
-       for p in pts
-       if len(p) > 1
-       and p[0] != "#"
+        p[0]: DataObjStr(*[*p[:1], *p[1].split(":"), *(p[2:4] + [p[0]]), p[0]])
+        for p in pts if len(p) > 1 and p[0] != "#"
     }
     lookup.update({ p.name: p for p in inv.objects })
     inv.objects.clear()
@@ -76,15 +66,15 @@ def getinv() -> Inventory:
 @functools.lru_cache(maxsize=0)
 def gethtml(url: Url) -> str:
     # haha i know its so bad
-    for i in range(0, 4):
-        try:
-            resp = requests.get(url)
-            if resp.status_code != 200:
-                raise SystemError(resp.status_code)
-            return resp.content
-        except SystemError:
-            continue
-    return ""
+  for _ in range(4):
+    try:
+        resp = requests.get(url)
+        if resp.status_code != 200:
+            raise SystemError(resp.status_code)
+        return resp.content
+    except SystemError:
+        continue
+  return ""
 
 @functools.lru_cache(maxsize=0)
 def getitem(symbol: str) -> Optional[DataObjStr]:
@@ -109,24 +99,20 @@ def getitem(symbol: str) -> Optional[DataObjStr]:
 
 
 def geturl(url, item: Optional[DataObjStr]) -> Optional[Url]:
-    if not item:
-        return None
-    uri = item.uri
-    uri = uri.replace("-$","")
-    uri = uri.replace("#$", "")
-    uri = uri.replace(".$", "")
-    uri = uri.strip("#").strip(".").strip("-")
-    if (
-        item.name in re.split("[^a-zA-Z_0-9]+", uri)
-    ):
-        pass
-    else:
-        uri = f"{uri}#{item.name}"
-    
-    print(repr(item))
-    return (
-        f"{url}/{uri}"
-    )
+  if not item:
+      return None
+  uri = item.uri
+  uri = uri.replace("-$","")
+  uri = uri.replace("#$", "")
+  uri = uri.replace(".$", "")
+  uri = uri.strip("#").strip(".").strip("-")
+  if item.name not in re.split("[^a-zA-Z_0-9]+", uri):
+    uri = f"{uri}#{item.name}"
+
+  print(repr(item))
+  return (
+      f"{url}/{uri}"
+  )
 
 def getdoc(
     symbol: str,

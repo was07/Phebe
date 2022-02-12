@@ -211,9 +211,7 @@ class HtmlToDiscord:
             self.html = html.decode("utf-8")
         elif isinstance(html, str):
             self.html = html
-        elif isinstance(html, BS):
-            self._doc = html
-        elif isinstance(html, Tag):
+        elif isinstance(html, (BS, Tag)):
             self._doc = html
         else:
             raise ValueError(f"html must be one of: {type(self).__init__.__annotations__}")
@@ -240,16 +238,12 @@ class HtmlToDiscord:
                 text = title.text.strip()
                 text = text.replace("\u2014", " - ")
                 text = text.replace("\u2013", " - ")
-                if " - " in text:
-                    self._title = text.split(" - ")[0]
-                else:
-                    self._title = text
-            else:
-                for h1 in self.doc.select("h1"):
-                    text = h1.text.strip()
-                    text = text.strip("\u00b6")
-                    text = text.strip()
-                    self._title = text
+                self._title = text.split(" - ")[0] if " - " in text else text
+            for h1 in self.doc.select("h1"):
+                text = h1.text.strip()
+                text = text.strip("\u00b6")
+                text = text.strip()
+                self._title = text
         return self._title
     
     @property
@@ -265,12 +259,8 @@ class HtmlToDiscord:
     @staticmethod
     def abs_url(base_url: Union[str,ParseResult], href: str) -> str:
         resolve_from = None
-        if isinstance(base_url, str):
-            resolve_from = urlparse(base_url)
-        else:
-            resolve_from = base_url
-        target_url = urljoin(resolve_from.geturl(), href)
-        return target_url
+        resolve_from = urlparse(base_url) if isinstance(base_url, str) else base_url
+        return urljoin(resolve_from.geturl(), href)
     
     def to_discord(self, elem: Tag):
         for anchor in elem.select("a[href], link[href]"):
