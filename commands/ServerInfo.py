@@ -58,30 +58,6 @@ class ServerInfo(commands.Cog):
                         value=f"⚪ {offline_members} 🟢 {online_members}",
                         inline=False)
         embed.add_field(name="Prefix", value=Config.prefix, inline=True)
-        embed.add_field(name="Architecture", value=arch, inline=True)
-        embed.add_field(name="Hostname", value=nodename, inline=True)
-        embed.add_field(name="LAN IP", value=lan_ip, inline=True)
-        embed.add_field(name="OS Type", value=sysname, inline=True)
-        embed.add_field(name="OS Release", value=release, inline=True)
-        embed.add_field(name="Build Info", value=safe_limit(version), inline=True)
-        embed.add_field(name="Home dir", value=safe_limit(expanduser("~")), inline=True)
-        embed.add_field(name="PATH", value=safe_limit(expanduser(getenv("PATH", "/sbin:/bin:/usr/bin"))), inline=True)
-        embed.add_field(name="Current dir", value=safe_limit(expanduser(getcwd())), inline=True)
-        embed.add_field(name="Previous dir", value=safe_limit(expanduser(getenv("OLDPWD", "~"))), inline=True)
-        embed.add_field(name="Shell", value=safe_limit(expanduser(getenv("SHELL", "/bin/sh"))), inline=True)
-        embed.add_field(name="Self",
-            value=safe_limit(
-                join(
-                    map(
-                        lambda i: i.decode("utf-8"),
-                        Path("/proc/self/cmdline")
-                            .read_bytes()
-                            .split(b"\x00")
-                    )
-                )
-            ),
-            inline=True
-        )
         embed.set_footer(
             text=f"Server: {sysname} on {arch}"
         )
