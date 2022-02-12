@@ -5,6 +5,7 @@ from os import getcwd, getenv, uname
 from os.path import expanduser
 from pathlib import Path
 from shlex import join
+from typing import Union
 import socket
 
 @lru_cache(maxsize=1)
@@ -13,6 +14,16 @@ def get_lan_ip():
     s.connect(("8.8.8.8", 80))
     lan_ip = s.getsockname()[0]
     return lan_ip
+
+def safe_limit(s: Union[str,bytes]) -> str:
+    if isinstance(s, bytes):
+        s = s.decode()
+    if len(s) >= 1024:
+        trailer = " ..."
+        return s[0: -len(trailer)] + trailer
+    if len(s) == 0:
+        s = "\u200B"
+    return s
 
 class ServerInfo(commands.Cog):
     def __init__(self, bot: Bot) -> None:
@@ -53,13 +64,13 @@ class ServerInfo(commands.Cog):
         embed.add_field(name="Home dir", value=expanduser("~"), inline=True)
         embed.add_field(name="PATH", value=expanduser(getenv("PATH", "/sbin:/bin:/usr/bin")), inline=True)
         embed.add_field(name="Current dir", value=expanduser(getcwd()), inline=True)
-        embed.add_field(name="Previous dir", value=expanduser(getenv("OLDPWD", "~")), inline=True)
-        embed.add_field(name="Shell", value=expanduser(getenv("SHELL", "/bin/sh")), inline=True)
+        embed.add_field(name="Previous dir", value=safe_limit(expanduser(getenv("OLDPWD", "~"))), inline=True)
+        embed.add_field(name="Shell", value=safe_limit(expanduser(getenv("SHELL", "/bin/sh"))), inline=True)
         embed.add_field(name="Self",
-            value=(
+            value=safe_limit(
                 join(
                     map(
-                        str,
+                        lambda i: i.decode("utf-8"),
                         Path("/proc/self/cmdline")
                             .read_bytes()
                             .split(b"\x00")
