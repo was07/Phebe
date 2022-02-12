@@ -3,6 +3,7 @@ Phebe
 A discord bot for the Python Experts Server
 """
 import disnake
+from disnake import Activity, ActivityType, Game
 from disnake.ext import commands
 
 import logging, sys
@@ -53,8 +54,11 @@ class Phebe(commands.Cog):
               f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms')
         self.bot.loop.create_task(self.status_task())
     
+    ## XXX TODO: Migrate to commands.WordFilter
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not hasattr(message.author, "roles"):
+            return
         role = disnake.utils.get(message.guild.roles, name="Moderation-Team")
         if role in message.author.roles:
             return
@@ -66,18 +70,26 @@ class Phebe(commands.Cog):
                         title='Warning',
                         description=f"**Your message got deleted by saying** *{word}* __that is a banned word.__")
                     )
-
-    async def status_task(self):
-        while True:
-            for activity in (disnake.Game(name=".help"),
-                             disnake.Activity(type=disnake.ActivityType.watching,
-                                              name="Members in Servers"),
-                             disnake.Activity(type=disnake.ActivityType.listening,
-                                              name="Moderation team command.")
-                                              ):
-                await self.bot.change_presence(activity=activity)
-                await asyncio.sleep(10)
     
+    ## XXX TODO: Migrate to commands.Status
+    async def status_task(self):
+        if Config.prefix == ".":
+            return    
+        for activity in (
+            Game(name=".help"),
+            Activity(
+                type=ActivityType.watching,
+                name="Members in Servers"
+            ),
+            Activity(
+                type=ActivityType.listening,
+                name="Moderation team command."
+            )
+        ):
+            await self.bot.change_presence(activity=activity)
+            await asyncio.sleep(30)
+    
+    ## XXX TODO: Migrate to commands.Ping
     @commands.command()
     async def ping(self, ctx):
         """Show latency in mili seconds"""
@@ -87,30 +99,19 @@ class Phebe(commands.Cog):
             color=""
         )
 
+    ## XXX TODO: Migrate to commands.Warn
     @commands.command()
     async def warn(self, ctx, member: disnake.Member):
         """Warn a User"""
         await ctx.send(f"{member: disnake.Member} has been warned")
 
+    ## XXX TODO: Migrate to commands.Timeout
     @commands.command()
     async def timeout(self, ctx, time, member: disnake.Member = None):
         """Timeout a User"""
         await member.timeout(duration=time)
     
-    # meeting command
-    # @commands.command()
-    # @commands.has_role("Moderation Team")
-    # async def meeting(self, ctx: commands.Context, *topic: str):
-    #     """Call a Moderation Team Meeting"""
-    #     channel = self.bot.get_channel(927262021496471563)
-    #     embed = disnake.Embed(
-    #         title='Moderator Team Meeting')
-    #     if topic:
-    #         embed.add_field(name="topic", value=' '.join(topic))
-    #     embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
-
-    #     await channel.send("<@&927259243302776912>", embed=embed)
-
+    ## XXX TODO: Migrate to commands.PFP
     @commands.command()
     async def pfp(self, ctx, member: disnake.Member = None):
         """Show profile picture of a user, or see yours"""
@@ -124,6 +125,7 @@ class Phebe(commands.Cog):
             url=ctx.author.avatar if member is None else member.avatar)
         await ctx.send(embed=embed)
 
+    ## XXX TODO: Migrate to commands.Flip
     @commands.command()
     async def flip(self, ctx):
         """Flip a vertual coin and get the result"""
@@ -139,6 +141,7 @@ class Phebe(commands.Cog):
 
         await ctx.reply(embed=embed)
 
+    ## XXX TODO: Migrate to commands.Roll
     @commands.command()
     async def roll(self, ctx):
         """roll a virtual dice and get the result"""
@@ -148,6 +151,7 @@ class Phebe(commands.Cog):
             title="Rolled a dice", description=f"Result is {comp}"
         ))
     
+    ## XXX TODO: Migrate to commands.Help
     @commands.command()
     async def help(self, ctx, given_cmd=''):
         if not given_cmd:
@@ -169,6 +173,7 @@ class Phebe(commands.Cog):
             embed=disnake.Embed(title="Can't find that")
             await ctx.send(embed=embed)    
     
+    ## XXX TODO: Migrate to commands.Format
     @commands.command()
     async def format(self, ctx):
         await ctx.send(embed=disnake.Embed(title='Code formatting',
@@ -180,13 +185,6 @@ print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They
 """))
 
 
-
-
-async def runserver():
-    while True:
-        StayAlive.start_server()
-        await asyncio.sleep(8000)
-        break
 
 
 if __name__ == "__main__":
