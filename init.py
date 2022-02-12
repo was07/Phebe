@@ -14,7 +14,6 @@ if sys.version_info < (3, 9):
           GenericAlias
       )
 
-@lambda c: c()
 class Config:
     sentinel = object()
     def __init__(self):
@@ -58,6 +57,7 @@ class Config:
         if default_val is not sentinel:
             return default_val
         return self.__getattr__(key)
+Config = Config()
 
 class Formatted:
     def __init__(self, fixed_part, formatted_paras, elem: Optional[Tag]=None):
