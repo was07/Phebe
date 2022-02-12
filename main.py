@@ -24,16 +24,16 @@ banned_words = ["@everyone", "@here"]
 
 hlp = {
     "Python": {
-        "d (symbol)": "Get the Python documentation for a given symble",
-        "e (code)": "Evaluate or run Python code and see output",
-        "pypi (name)": "Get the description of a pip module"
+        "d": ("(symbol)", "Get the Python documentation for a given symble"),
+        "e": ("(code)", "Evaluate or run Python code and see output"),
+        "pypi": ("(name)", "Get the description of a pip module")
     },
     "Server": {
-        "rule (number)": "Get a specific rule of the server",
-        "serverinfo": "Get some information about the server"
+        "rule": ("(number)", "Get a specific rule of the server"),
+        "serverinfo": ("", "Get some information about the server")
     },
     "More": {
-        "wiki (subject)": "Get the Wikipedia page of a subject"
+        "wiki": ("(subject)", "Get the Wikipedia page of a subject")
     }
 }
 
@@ -82,9 +82,9 @@ class Phebe(commands.Cog):
         """Show latency in mili seconds"""
         await ctx.send(embed=disnake.Embed(
             title='Pong!',
-            description=f"🟢 **Bot is active**\n\n"
-                        f"🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms")
-                       )
+            description=f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms"),
+            color=""
+        )
 
     @commands.command()
     async def warn(self, ctx, member: disnake.Member):
@@ -148,14 +148,25 @@ class Phebe(commands.Cog):
         ))
     
     @commands.command()
-    async def help(self, ctx):
-        embed=disnake.Embed(title="Available commands")
-        for type_, cmds in hlp.items():
-            txt = ""
-            for cmd, about in cmds.items():
-                txt += f"`{self.bot.command_prefix}{cmd}`\n{about}\n\n"
-            embed.add_field(name=type_, value=txt)
-        await ctx.send(embed=embed)
+    async def help(self, ctx, given_cmd=''):
+        if not given_cmd:
+            embed=disnake.Embed(title="Available commands")
+            for type_, cmds in hlp.items():
+                txt = ""
+                for cmd, about in cmds.items():
+                    txt += f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n"
+                embed.add_field(name=type_, value=txt)
+            await ctx.send(embed=embed)
+        else:
+            for type_, cmds in hlp.items():
+                for cmd, about in cmds.items():
+                    if cmd.lower() == given_cmd.lower():
+                        embed=disnake.Embed(title="Command Help",
+                                            description=f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n")
+                        await ctx.send(embed=embed)
+                        return            
+            embed=disnake.Embed(title="Can't find that")
+            await ctx.send(embed=embed)    
     
     @commands.command()
     async def format(self, ctx):
