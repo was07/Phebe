@@ -13,4 +13,4 @@ class money(commands.Cog):
 
     @commands.command()
     async def money(self, ctx):
-        await ctx.send("You have no money")
+        await ctx.send("You have freaking money")
