@@ -18,7 +18,7 @@ def get_lan_ip():
 def safe_limit(s: Union[str,bytes]) -> str:
     if isinstance(s, bytes):
         s = s.decode()
-    if len(s) >= 1024:
+    if len(s) >= 255:
         trailer = " ..."
         return s[0: -len(trailer)] + trailer
     if len(s) == 0:
@@ -60,10 +60,10 @@ class ServerInfo(commands.Cog):
         embed.add_field(name="LAN IP", value=lan_ip, inline=True)
         embed.add_field(name="OS Type", value=sysname, inline=True)
         embed.add_field(name="OS Release", value=release, inline=True)
-        embed.add_field(name="Build Info", value=version, inline=True)
-        embed.add_field(name="Home dir", value=expanduser("~"), inline=True)
-        embed.add_field(name="PATH", value=expanduser(getenv("PATH", "/sbin:/bin:/usr/bin")), inline=True)
-        embed.add_field(name="Current dir", value=expanduser(getcwd()), inline=True)
+        embed.add_field(name="Build Info", value=safe_limit(version), inline=True)
+        embed.add_field(name="Home dir", value=safe_limit(expanduser("~")), inline=True)
+        embed.add_field(name="PATH", value=safe_limit(expanduser(getenv("PATH", "/sbin:/bin:/usr/bin"))), inline=True)
+        embed.add_field(name="Current dir", value=safe_limit(expanduser(getcwd()), inline=True))
         embed.add_field(name="Previous dir", value=safe_limit(expanduser(getenv("OLDPWD", "~"))), inline=True)
         embed.add_field(name="Shell", value=safe_limit(expanduser(getenv("SHELL", "/bin/sh"))), inline=True)
         embed.add_field(name="Self",
