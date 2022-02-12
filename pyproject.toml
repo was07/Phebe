@@ -17,6 +17,7 @@ base_utils = "^1.0.14"
 aiohttp = "^3.8.1"
 nest-asyncio = "^1.5.4"
 websockets = "^10.0"
+python-dotenv = "^0.19.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
