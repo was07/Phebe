@@ -20,7 +20,7 @@ def safe_limit(s: Union[str,bytes]) -> str:
         s = s.decode()
     if len(s) >= 255:
         trailer = " ..."
-        return s[0: -len(trailer)] + trailer
+        return s[0: 255] + trailer
     if len(s) == 0:
         s = "\u200B"
     return s
