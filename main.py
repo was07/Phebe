@@ -137,8 +137,10 @@ class Phebe(commands.Cog):
         res = random.randint(1, 2)
 
         embed = disnake.Embed(
-            title=f'Flipped a coin',
-            description=f"**{('Heads' if res == 1 else 'Tails')}**")
+            title='Flipped a coin',
+            description=f"**{('Heads' if res == 1 else 'Tails')}**",
+        )
+
         embed.set_thumbnail(heads_url if res == 1 else tails_url)
 
         await ctx.reply(embed=embed)
@@ -159,11 +161,12 @@ class Phebe(commands.Cog):
         if not given_cmd:
             embed=disnake.Embed(title="Available commands")
             for type_, cmds in hlp.items():
-                txt = ""
-                for cmd, about in cmds.items():
-                    txt += f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n"
+                txt = "".join(
+                    f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n"
+                    for cmd, about in cmds.items()
+                )
+
                 embed.add_field(name=type_, value=txt)
-            await ctx.send(embed=embed)
         else:
             for type_, cmds in hlp.items():
                 for cmd, about in cmds.items():
@@ -171,9 +174,10 @@ class Phebe(commands.Cog):
                         embed=disnake.Embed(title="Command Help",
                                             description=f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n")
                         await ctx.send(embed=embed)
-                        return            
-            embed=disnake.Embed(title="Can't find that")
-            await ctx.send(embed=embed)    
+                        return
+            embed=disnake.Embed(title="Can't find that")    
+
+        await ctx.send(embed=embed)    
     
     ## XXX TODO: Migrate to commands.Format
     @commands.command()

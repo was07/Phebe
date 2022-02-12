@@ -50,13 +50,12 @@ def _t():
     raise err
   class ModDict(Mapping):
     def __init__(self):
-      if False:
-        t = __sys_mod
+      pass
     def __getitem__(self, name, defv=__):
       if name in ("os", "sys"):
         raise Exception(f"Prohibited module {name}")
       mod = __sys_mod.get(name, __) or _raise(KeyError(name))
-      if name == "os" or name == "sys":
+      if name in ["os", "sys"]:
         for i in range(5):
           if sys._getframe(i).f_code.co_filename[0] == "<":
             raise Exception(f"Prohibited module {name}")
@@ -75,7 +74,7 @@ def _t():
         raise Exception(f"Prohibited module reset ty: {name} {newv=}")
       __sys_mod[name] = newv
     def __delitem__(self, name):
-      if name == "os" or name == "sys":
+      if name in ["os", "sys"]:
         raise Exception(f"Prohibited module delete: {name}")
       return None
     def __iter__(self):
@@ -107,7 +106,7 @@ def _t():
     if event == "os.system":
       if arg[0] == b'(pager) 2>/dev/null':
         return
-    if event == "subprocess.Popen":
+    elif event == "subprocess.Popen":
       if arg[0] == '/bin/sh' and arg[1] == ['/bin/sh', '-c', 'pager']:
         return
 

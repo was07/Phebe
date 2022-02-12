@@ -21,5 +21,3 @@ class Doc(commands.Cog):
                 description = str(doc),
                 color=disnake.Color.blue()
             ))
-        else:
-            pass

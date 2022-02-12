@@ -14,15 +14,15 @@ class PyPi(commands.Cog):
             await ctx.send('Package name required.')
             return
 
-        resp = requests.get("https://pypi.org/pypi/" + name + "/json")
+        resp = requests.get(f'https://pypi.org/pypi/{name}/json')
         if resp.status_code == 404:
             await ctx.send(embed=disnake.Embed(title=f"Could not find {name}"))
             return
-        
+
         data = resp.json()
         info = data['info']
         url = info['project_url']
-        
+
         rawdescr = info['description']
         text = format(rawdescr)
         await ctx.send(embed=disnake.Embed(
@@ -47,7 +47,6 @@ def format(text, lines=6):
         l += 1
         if line.startswith('##'):
             res += f"*{line.lstrip('##').strip()}*"
-            pass
         elif line.startswith('#'):
             res += f"**{line.lstrip('#').strip()}**"
         elif line.startswith(':'):
@@ -61,13 +60,11 @@ def format(text, lines=6):
         elif line.startswith('. ...'):
             res += f"**{line.lstrip('. ...').strip()}**"
         else:
-            res += line 
+            res += line
         res += '\n'
-        if l >= lines:
+        if l >= lines and '__start_py' in res and '```' not in res:
+            res += '```'
+            break 
 
-            if '__start_py' in res and '```' not in res:
-                res += '```'
-                break 
-    
     res = res.replace('__start_py', '```py')
     return res.rstrip() + ' ...'

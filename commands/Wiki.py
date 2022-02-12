@@ -211,9 +211,7 @@ class HtmlToDiscord:
             self.html = html.decode("utf-8")
         elif isinstance(html, str):
             self.html = html
-        elif isinstance(html, BS):
-            self._doc = html
-        elif isinstance(html, Tag):
+        elif isinstance(html, (BS, Tag)):
             self._doc = html
         else:
             raise ValueError(f"html must be one of: {type(self).__init__.__annotations__}")
@@ -240,16 +238,12 @@ class HtmlToDiscord:
                 text = title.text.strip()
                 text = text.replace("\u2014", " - ")
                 text = text.replace("\u2013", " - ")
-                if " - " in text:
-                    self._title = text.split(" - ")[0]
-                else:
-                    self._title = text
-            else:
-                for h1 in self.doc.select("h1"):
-                    text = h1.text.strip()
-                    text = text.strip("\u00b6")
-                    text = text.strip()
-                    self._title = text
+                self._title = text.split(" - ")[0] if " - " in text else text
+            for h1 in self.doc.select("h1"):
+                text = h1.text.strip()
+                text = text.strip("\u00b6")
+                text = text.strip()
+                self._title = text
         return self._title
     
     @property
@@ -265,12 +259,8 @@ class HtmlToDiscord:
     @staticmethod
     def abs_url(base_url: Union[str,ParseResult], href: str) -> str:
         resolve_from = None
-        if isinstance(base_url, str):
-            resolve_from = urlparse(base_url)
-        else:
-            resolve_from = base_url
-        target_url = urljoin(resolve_from.geturl(), href)
-        return target_url
+        resolve_from = urlparse(base_url) if isinstance(base_url, str) else base_url
+        return urljoin(resolve_from.geturl(), href)
     
     def to_discord(self, elem: Tag):
         for anchor in elem.select("a[href], link[href]"):
@@ -304,14 +294,18 @@ class Wiki(commands.Cog):
             return Embed(
                 description=f"No results found for {name!r}"
             )
-        best = [r for r in results if re.subn("[^a-z]+", "", r.title.split("(")[0].strip().lower())[0] == re.subn("[^a-z]+", "", name.split("(")[0].strip().lower())[0]]
-        if best:
+        if best := [
+            r
+            for r in results
+            if re.subn("[^a-z]+", "", r.title.split("(")[0].strip().lower())[0]
+            == re.subn("[^a-z]+", "", name.split("(")[0].strip().lower())[0]
+        ]:
             result = best[0]
         else:
             result = results[0]
         title, url = result.title, result.url
         response = requests.get(url.url)
-    
+
         if b"may refer to" in response.content:
           conv = HtmlToDiscord(response.content.decode())
           links = conv.doc.select('ul > li a[title]')
@@ -319,14 +313,13 @@ class Wiki(commands.Cog):
           url = HtmlToDiscord.abs_url(conv.url, rel_url)
           title = links[0].text.strip()
           response = requests.get(url)
-        
+
         html = response.content
         odx = html.find(b"mf-section-0")
         if odx != -1:
-            html = html[0 : odx + 3000]
-        
-        images = get_wiki_images(result)
-        if images:
+            html = html[:odx + 3000]
+
+        if images := get_wiki_images(result):
             thumbnail = images[0].href.url
         else:
             thumbnail =  (
@@ -343,7 +336,7 @@ class Wiki(commands.Cog):
             paras = conv.doc.select("p:not(.mw-empty-elt)")
         if not paras:
             paras = [conv.doc]
-        
+
         para = paras[0]
         conv.to_discord(para)
         embed = Embed(
