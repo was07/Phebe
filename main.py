@@ -19,6 +19,7 @@ from threading import Thread
 import asyncio
 import StayAlive
 from colorama import Fore
+from init import Config
 
 banned_words = ["@everyone", "@here"]
 
@@ -196,7 +197,7 @@ if __name__ == "__main__":
     try:
         intents.presences = True
         bot: commands.Bot = commands.Bot(
-            command_prefix=".",
+            command_prefix=Config.prefix,
             description=Phebe.__doc__,
             intents=intents,
             help_command=None
@@ -204,7 +205,7 @@ if __name__ == "__main__":
     except:
         intents.presences = False
         bot: commands.Bot = commands.Bot(
-            command_prefix=".",
+            command_prefix=Config.prefix,
             description=Phebe.__doc__,
             intents=intents,
             help_command=None
@@ -216,17 +217,23 @@ if __name__ == "__main__":
         if item.name.endswith(".py"):
             name = f'{item.parent.name}.{item.stem}'
             print(f"Loading extension: {name}")
-            bot.load_extension(name)
-
+            try:
+                bot.load_extension(name)
+            except BaseException as exc:
+                import traceback
+                print(
+                    traceback.format_exc(
+                        type(exc), exc, exc.__traceback__
+                    ),
+                    file=sys.stderr
+                )
+    
     t = Thread(target=StayAlive.start_server)
     t.start()
 
     while True:
         try:
-            bot.run(
-                os.getenv("Token")
-                or __import__("dotenv").get_key(dotenv_path=".env",
-                                                key_to_get="Token"))
+            bot.run(Config.token)
         except disnake.errors.HTTPException:
             import traceback, sys, os
             traceback.print_exc(999, sys.stderr, True)
