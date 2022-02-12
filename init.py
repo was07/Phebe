@@ -54,7 +54,7 @@ class Config:
                 )
             return val
         # show error
-        if default_val is not sentinel:
+        if default_val is not self.sentinel:
             return default_val
         return self.__getattr__(key)
 Config = Config()
