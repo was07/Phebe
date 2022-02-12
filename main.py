@@ -57,10 +57,11 @@ class Phebe(commands.Cog):
     ## XXX TODO: Migrate to commands.WordFilter
     @commands.Cog.listener()
     async def on_message(self, message):
-        if not hasattr(message.author, "roles"):
+        author: Member = get_member(message.author)
+        if author.bot:
             return
-        role = disnake.utils.get(message.guild.roles, name="Moderation-Team")
-        if role in message.author.roles:
+        roles_by_name = get_roles(author)
+        if "Moderation-Team" in roles_by_name:
             return
         for word in banned_words:
             if word in message.content.lower():
@@ -68,7 +69,7 @@ class Phebe(commands.Cog):
                 await message.author.send(
                     embed=disnake.Embed(
                         title='Warning',
-                        description=f"**Your message got deleted by saying** *{word}* __that is a banned word.__")
+                        description=f"**{author.mention}: Your message got deleted by saying** *{word}* __that is a banned word.__")
                     )
     
     ## XXX TODO: Migrate to commands.Status
@@ -220,8 +221,10 @@ if __name__ == "__main__":
             except BaseException as exc:
                 import traceback
                 print(
-                    traceback.format_exc(
-                        type(exc), exc, exc.__traceback__
+                    "\x0a".join(
+                        traceback.format_exception(
+                            type(exc), exc, exc.__traceback__
+                        )
                     ),
                     file=sys.stderr
                 )

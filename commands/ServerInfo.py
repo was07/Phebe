@@ -1,5 +1,18 @@
 from base import *
+from init import Config
+from functools import lru_cache
+from os import getcwd, getenv, uname
+from os.path import expanduser
+from pathlib import Path
+from shlex import join
+import socket
 
+@lru_cache(maxsize=1)
+def get_lan_ip():
+    s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    lan_ip = s.getsockname()[0]
+    return lan_ip
 
 class ServerInfo(commands.Cog):
     def __init__(self, bot: Bot) -> None:
@@ -13,6 +26,8 @@ class ServerInfo(commands.Cog):
         
         offline_members = 0
         online_members = 0
+        lan_ip = get_lan_ip()
+        arch, nodename, sysname, release, version = uname()
 
         for member in guild.members:
             if member.status == disnake.Status.offline:
@@ -26,6 +41,36 @@ class ServerInfo(commands.Cog):
                         value=guild.member_count,
                         inline=False)
         embed.add_field(name='Members Status',
-                        value=f"⚪ {offline_members} 🟢 {online_members}")
-
+                        value=f"⚪ {offline_members} 🟢 {online_members}",
+                        inline=False)
+        embed.add_field(name="Prefix", value=Config.prefix, inline=True)
+        embed.add_field(name="Architecture", value=arch, inline=True)
+        embed.add_field(name="Hostname", value=nodename, inline=True)
+        embed.add_field(name="LAN IP", value=lan_ip, inline=True)
+        embed.add_field(name="OS Type", value=sysname, inline=True)
+        embed.add_field(name="OS Release", value=release, inline=True)
+        embed.add_field(name="Build Info", value=version, inline=True)
+        embed.add_field(name="Home dir", value=expanduser("~"), inline=True)
+        embed.add_field(name="PATH", value=expanduser(getenv("PATH", "/sbin:/bin:/usr/bin")), inline=True)
+        embed.add_field(name="Current dir", value=expanduser(getcwd()), inline=True)
+        embed.add_field(name="Previous dir", value=expanduser(getenv("OLDPWD", "~")), inline=True)
+        embed.add_field(name="Shell", value=expanduser(getenv("SHELL", "/bin/sh")), inline=True)
+        embed.add_field(name="Self",
+            value=(
+                join(
+                    map(
+                        str,
+                        Path("/proc/self/cmdline")
+                            .read_bytes()
+                            .split(b"\x00")
+                    )
+                )
+            ),
+            inline=False
+        )
+        
         await ctx.send(embed=embed)
+
+#
+#
+        
