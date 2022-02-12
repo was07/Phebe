@@ -22,14 +22,14 @@ class Config:
     def __getattr__(self, key):
         try:
             return object.__getattribute__(self, key)
-        except AttributeError:
+        except AttributeError as e:
             raise ValueError(
                 f"Config variable {key!r} not loaded. \x0a"
                 f"Perhaps you forgot to set a default "
                 f"in `init.py`::`Config.__init__` using \x0a"
                 f"`self.{key} = self.load_var("
                 f"{key!r}, <DEFAULT>)`?"
-            )
+            ) from e
     
     def load_from_envvar(self, key):
         return os.getenv(key)

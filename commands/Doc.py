@@ -1,5 +1,6 @@
 from base import *
 import getdoc
+from init import Formatted
 
 class Doc(commands.Cog):
     def __init__(self, bot: Bot) -> None:
