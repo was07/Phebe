@@ -57,10 +57,10 @@ class Phebe(commands.Cog):
     ## XXX TODO: Migrate to commands.WordFilter
     @commands.Cog.listener()
     async def on_message(self, message):
-        author: Member = get_member(message.author)
+        author: Member = member_for(message.author)
         if author.bot:
             return
-        roles_by_name = get_roles(author)
+        roles_by_name: dict[str,Role] = role_names(author)
         if "Moderation-Team" in roles_by_name:
             return
         for word in banned_words:
