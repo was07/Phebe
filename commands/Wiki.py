@@ -294,14 +294,18 @@ class Wiki(commands.Cog):
             return Embed(
                 description=f"No results found for {name!r}"
             )
-        best = [r for r in results if re.subn("[^a-z]+", "", r.title.split("(")[0].strip().lower())[0] == re.subn("[^a-z]+", "", name.split("(")[0].strip().lower())[0]]
-        if best:
+        if best := [
+            r
+            for r in results
+            if re.subn("[^a-z]+", "", r.title.split("(")[0].strip().lower())[0]
+            == re.subn("[^a-z]+", "", name.split("(")[0].strip().lower())[0]
+        ]:
             result = best[0]
         else:
             result = results[0]
         title, url = result.title, result.url
         response = requests.get(url.url)
-    
+
         if b"may refer to" in response.content:
           conv = HtmlToDiscord(response.content.decode())
           links = conv.doc.select('ul > li a[title]')
@@ -309,14 +313,13 @@ class Wiki(commands.Cog):
           url = HtmlToDiscord.abs_url(conv.url, rel_url)
           title = links[0].text.strip()
           response = requests.get(url)
-        
+
         html = response.content
         odx = html.find(b"mf-section-0")
         if odx != -1:
-            html = html[0 : odx + 3000]
-        
-        images = get_wiki_images(result)
-        if images:
+            html = html[:odx + 3000]
+
+        if images := get_wiki_images(result):
             thumbnail = images[0].href.url
         else:
             thumbnail =  (
@@ -333,7 +336,7 @@ class Wiki(commands.Cog):
             paras = conv.doc.select("p:not(.mw-empty-elt)")
         if not paras:
             paras = [conv.doc]
-        
+
         para = paras[0]
         conv.to_discord(para)
         embed = Embed(

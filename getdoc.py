@@ -47,6 +47,7 @@ def getinv() -> Inventory:
   if invs:
     return invs
   invs.update(asyncio.run(get_all_invs()))
+
   for url, inv in invs.items():
     lines = inv.data_file().splitlines()
     pts = [
