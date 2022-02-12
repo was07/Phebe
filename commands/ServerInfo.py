@@ -38,7 +38,7 @@ class ServerInfo(commands.Cog):
         offline_members = 0
         online_members = 0
         lan_ip = get_lan_ip()
-        arch, nodename, sysname, release, version = uname()
+        sysname, nodename, release, version, arch = uname()
 
         for member in guild.members:
             if member.status == disnake.Status.offline:
@@ -46,7 +46,10 @@ class ServerInfo(commands.Cog):
             else:
                 online_members += 1
 
-        embed = Embed(title=guild.name)
+        embed = Embed(
+            title=guild.name,
+            colour=disnake.Colour.brand_green(),
+        )
         embed.set_thumbnail(guild.icon)
         embed.add_field(name='Total Members',
                         value=guild.member_count,
@@ -63,7 +66,7 @@ class ServerInfo(commands.Cog):
         embed.add_field(name="Build Info", value=safe_limit(version), inline=True)
         embed.add_field(name="Home dir", value=safe_limit(expanduser("~")), inline=True)
         embed.add_field(name="PATH", value=safe_limit(expanduser(getenv("PATH", "/sbin:/bin:/usr/bin"))), inline=True)
-        embed.add_field(name="Current dir", value=safe_limit(expanduser(getcwd()), inline=True))
+        embed.add_field(name="Current dir", value=safe_limit(expanduser(getcwd())), inline=True)
         embed.add_field(name="Previous dir", value=safe_limit(expanduser(getenv("OLDPWD", "~"))), inline=True)
         embed.add_field(name="Shell", value=safe_limit(expanduser(getenv("SHELL", "/bin/sh"))), inline=True)
         embed.add_field(name="Self",
@@ -77,9 +80,11 @@ class ServerInfo(commands.Cog):
                     )
                 )
             ),
-            inline=False
+            inline=True
         )
-        
+        embed.set_footer(
+            text=f"Server: {sysname} on {arch}"
+        )
         await ctx.send(embed=embed)
 
 #

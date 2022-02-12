@@ -21,6 +21,7 @@ import asyncio
 import StayAlive
 from colorama import Fore
 from init import Config
+from base import *
 
 banned_words = ["@everyone", "@here"]
 
