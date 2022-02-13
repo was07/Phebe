@@ -28,8 +28,8 @@ def member_for(user: Union[User, Member]) -> Member:
     "Return the full Member object corresponding to `user`."
     if isinstance(user, Member):
         return user
-    from main import bot
-    return [m for m in bot.guilds[0].members if m.id == user.id][0]
+    from __main__ import bot
+    return [m for m in bot.guilds[0].members if m.id == user.id][0] # XXX: FIXME Need bot.
 
 
 def role_names(user: Union[User, Member]) -> dict[str, Role]:
