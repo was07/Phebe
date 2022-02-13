@@ -8,11 +8,12 @@ from disnake.ext import commands
 
 import logging, sys
 
-l = logging.getLogger("disnake.client")
-l.setLevel(logging.INFO)
-logging.root.setLevel(logging.INFO)
-# logging.root.addHandler(logging.StreamHandler(sys.stderr))
 
+logging.root.setLevel(logging.INFO)
+l = logging.getLogger("disnake.client")
+l.setLevel(logging.WARNING)
+logging.root.addHandler(logging.StreamHandler(sys.stderr))
+log = logging.getLogger(__name__)
 from pathlib import Path
 import os
 import random
@@ -22,6 +23,7 @@ import StayAlive
 from colorama import Fore
 from init import Config
 from base import *
+from typing import Optional
 
 banned_words = ["@everyone", "@here"]
 
@@ -137,8 +139,10 @@ class Phebe(commands.Cog):
         res = random.randint(1, 2)
 
         embed = disnake.Embed(
-            title=f'Flipped a coin',
-            description=f"**{('Heads' if res == 1 else 'Tails')}**")
+            title='Flipped a coin',
+            description=f"**{('Heads' if res == 1 else 'Tails')}**",
+        )
+
         embed.set_thumbnail(heads_url if res == 1 else tails_url)
 
         await ctx.reply(embed=embed)
@@ -147,100 +151,102 @@ class Phebe(commands.Cog):
     @commands.command()
     async def roll(self, ctx):
         """roll a virtual dice and get the result"""
-        comp = random.randint(1,6)
+        comp = random.randint(1, 6)
 
-        await ctx.reply(embed=disnake.Embed(
-            title="Rolled a dice", description=f"Result is {comp}"
-        ))
-    
-    ## XXX TODO: Migrate to commands.Help
-    @commands.command()
-    async def help(self, ctx, given_cmd=''):
-        if not given_cmd:
-            embed=disnake.Embed(title="Available commands")
-            for type_, cmds in hlp.items():
-                txt = ""
-                for cmd, about in cmds.items():
-                    txt += f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n"
-                embed.add_field(name=type_, value=txt)
-            await ctx.send(embed=embed)
-        else:
-            for type_, cmds in hlp.items():
-                for cmd, about in cmds.items():
-                    if cmd.lower() == given_cmd.lower():
-                        embed=disnake.Embed(title="Command Help",
-                                            description=f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n")
-                        await ctx.send(embed=embed)
-                        return            
-            embed=disnake.Embed(title="Can't find that")
-            await ctx.send(embed=embed)    
-    
+        await ctx.reply(embed=disnake.Embed(title="Rolled a dice", description=f"Result is {comp}"))
+
     ## XXX TODO: Migrate to commands.Format
     @commands.command()
     async def format(self, ctx):
-        await ctx.send(embed=disnake.Embed(title='Code formatting',
-                                           ddescription="""
+        await ctx.send(
+            embed=disnake.Embed(
+                title="Code formatting",
+                ddescription="""
 		To properly format Python code in Discord, write your code like this:
 
 \\`\\`\\`py
 print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They are often under the Escape (esc) key on most keyboard orientations, they could be towards the right side of the keyboard if you are using eastern european/balkan language keyboards.
-"""))
+""",
+            )
+        )
 
 
-
-
-if __name__ == "__main__":
+class State:
     intents = disnake.Intents.none()
     intents.messages = True
     intents.guilds = True
     intents.members = True
-    try:
-        intents.presences = True
-        bot: commands.Bot = commands.Bot(
-            command_prefix=Config.prefix,
-            description=Phebe.__doc__,
-            intents=intents,
-            help_command=None
-        )
-    except:
-        intents.presences = False
-        bot: commands.Bot = commands.Bot(
-            command_prefix=Config.prefix,
-            description=Phebe.__doc__,
-            intents=intents,
-            help_command=None
-        )
-    bot.add_cog(Phebe(bot))
-    
-    dir: Path = Path("commands")
-    for item in dir.iterdir():
-        if item.name.endswith(".py"):
-            name = f'{item.parent.name}.{item.stem}'
-            print(f"Loading extension: {name}")
-            try:
-                bot.load_extension(name)
-            except BaseException as exc:
-                import traceback
-                print(
-                    "\x0a".join(
-                        traceback.format_exception(
-                            type(exc), exc, exc.__traceback__
-                        )
-                    ),
-                    file=sys.stderr
-                )
-    
-    t = Thread(target=StayAlive.start_server)
-    t.start()
+    intents.presences = True
+    client_thread: Optional[Thread] = None
+    webserver_thread: Optional[Thread] = None
+    bot: commands.Bot = commands.Bot(
+        command_prefix=Config.prefix,
+        description=Phebe.__doc__,
+        intents=intents,
+    )
+    cogs = {}
+    commands = {}
 
-    while True:
-        try:
-            bot.run(Config.token)
-        except disnake.errors.HTTPException:
-            import traceback, sys, os
-            traceback.print_exc(999, sys.stderr, True)
-            import threading
+    @classmethod
+    def get_cogs(cls):
+        return cls.bot._CommonBotBase__cogs
+
+    @classmethod
+    def load_cogs(cls):
+        phebe: Phebe = Phebe(cls.bot)
+        cls.cogs[type(phebe).__name__] = phebe
+        cls.bot.add_cog(phebe)
+        cls.commands.update({c.name: c for c in phebe.get_commands()})
+
+        dir: Path = Path("commands")
+        for item in dir.iterdir():
+            if not item.name.endswith(".py"):
+                continue
+            name = f"{item.parent.name}.{item.stem}"
+            log.info("Loading extension: %s", name)
+            before = set(cls.get_cogs())
             try:
-                threading.shutdown()
-            finally:
-                os._exit(255)
+                cls.bot.load_extension(name)
+            except BaseException as ex:
+                rendered_list = traceback.format_exception(type(ex), ex, ex.__traceback__)
+                log.error("Command %r failed to load: \n%s\n\n", name, "\x0A".join(rendered_list))
+                continue
+            for k in set(cls.get_cogs()) - before:
+                newcog = cls.get_cogs()[k]
+                cls.cogs[k] = newcog
+                cls.commands.update({c.name: c for c in newcog.get_commands()})
+                log.info("Loaded cog %r (%s)", k, newcog)
+
+    @classmethod
+    def start_client(cls, run_blocking=False):
+        if cls.client_thread:
+            return
+        if run_blocking:
+            cls.bot.run(Config.token)
+        else:
+            cls.login_result = asyncio.run(cls.bot.http.static_login(Config.token))
+            log.info(f"logged in: {cls.login_result}")
+            cls.client_thread = Thread(target=lambda: asyncio.run(cls.bot.start(Config.token)))
+            cls.client_thread.start()
+            log.info("started client: %s", cls.client_thread)
+
+    @classmethod
+    def start_webserver(cls):
+        if cls.webserver_thread:
+            return
+        cls.webserver_thread = Thread(target=lambda: asyncio.run(State.bot.start(Config.token)))
+        cls.webserver_thread.start()
+        log.info("started websvr: %s", cls.webserver_thread)
+
+    @classmethod
+    def run_bot(cls):
+        bot.run(Config.token)
+
+
+if not "thread" in globals():
+    State.load_cogs()
+    log.info(f"loaded {len(State.cogs)} cogs")
+    log.info(f"loaded {len(State.commands)} commands")
+    State.start_client(run_blocking=__name__ == "__main__")
+    if __name__ == "__main__":
+        State.start_webserver()
