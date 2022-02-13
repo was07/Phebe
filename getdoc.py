@@ -12,7 +12,7 @@ from init import Formatted
 from sphobjinv.inventory import Inventory
 from sphobjinv.data import DataObjStr
 from bs4 import BeautifulSoup as BS
-from bs4.element import Tag
+from bs4.element import NavigableString, PageElement, Tag
 
 HtmlStr = TypeVar("HtmlStr", bound = str)
 Url = TypeVar("Url", bound = str)
@@ -172,8 +172,11 @@ def getdoc(
             ).replace("\x0A", "<nl>")
         ))
     
-    text = (
-        "\n".join(e.text for e in (dd.children or dd))
+    text = "\x0A".join(
+        str(e)
+        if isinstance(e, NavigableString)
+        else e.text
+        for e in (dd.children or dd)
     )
     paras = islice(
         text.split("\n\n\n\n"),
