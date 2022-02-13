@@ -15,28 +15,34 @@ class MyHelpCommand(commands.DefaultHelpCommand):
         self.no_category = options.pop("no_category", "Python")
         self.paginator = options.pop("paginator", Paginator())
         super().__init__(**options)
-        self.context.bot = bot        
-    
+        self.context.bot = bot
+
     @override
     def get_command_signature(self, command):
-        return (
-            f'{self.clean_prefix}'
-            f'{command.qualified_name} '
-            f'{command.signature}'
-        )
+        return f"{self.clean_prefix}" f"{command.qualified_name} " f"{command.signature}"
+
+    @override
+    async def send_pages(self):
+        destination = self.get_destination()
+        log.info("send_pages: destination=%s", destination)
+        for page in self.paginator.pages:
+            page = page.strip().strip("```")
+            log.info("page=%s", page)
+            emby = Embed(description=page)
+            await destination.send(embed=emby)
+
 
 class Help(commands.Cog):
     @override
     def __init__(self, bot: Bot):
-        log.info("loading {} cog", type(self).__name__)
-        log.info("original help cmd: {}", bot.help_command)
+        log.info("loading %s cog", type(self).__name__)
+        log.info("original help cmd: %s", bot.help_command)
         self._original_help_command = bot.help_command
         new_help_command = MyHelpCommand(prefix=Config.prefix)
-        log.info("new help cmd: {}", new_help_command)
+        log.info("new help cmd: %s", new_help_command)
         bot.help_command = new_help_command
         bot.help_command.cog = self
-    
+
     @override
     def cog_unload(self):
         self.bot.help_command = self._original_help_command
-

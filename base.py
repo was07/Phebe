@@ -28,17 +28,13 @@ def member_for(user: Union[User, Member]) -> Member:
     "Return the full Member object corresponding to `user`."
     if isinstance(user, Member):
         return user
-    return [
-        m for m in bot.guilds[0].members
-        if m.id == user.id
-    ][0]
+    return [m for m in bot.guilds[0].members if m.id == user.id][0]
 
-def role_names(user: Union[User, Member]) -> dict[str,Role]:
+
+def role_names(user: Union[User, Member]) -> dict[str, Role]:
     "Return a dict mapping role names to Role objects."
-    return {
-        r.name:r
-        for r in member_for(user).roles
-    }
+    return {r.name: r for r in member_for(user).roles}
+
 
 def setup(bot: commands.Bot):
     """
