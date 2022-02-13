@@ -283,6 +283,7 @@ class Wiki(commands.Cog):
     def __init__(self, bot: Bot) -> None:
         super().__init__()
         self.bot = bot
+        type(self).__cog_name__ = "More"
 
     @commands.command()
     async def wiki(self, ctx, *, name=""):

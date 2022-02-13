@@ -155,30 +155,6 @@ class Phebe(commands.Cog):
             title="Rolled a dice", description=f"Result is {comp}"
         ))
     
-    ## XXX TODO: Migrate to commands.Help
-    @commands.command()
-    async def help(self, ctx, given_cmd=''):
-        if not given_cmd:
-            embed=disnake.Embed(title="Available commands")
-            for type_, cmds in hlp.items():
-                txt = "".join(
-                    f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n"
-                    for cmd, about in cmds.items()
-                )
-
-                embed.add_field(name=type_, value=txt)
-        else:
-            for type_, cmds in hlp.items():
-                for cmd, about in cmds.items():
-                    if cmd.lower() == given_cmd.lower():
-                        embed=disnake.Embed(title="Command Help",
-                                            description=f"`{self.bot.command_prefix}{cmd} {about[0]}`\n{about[1]}\n\n")
-                        await ctx.send(embed=embed)
-                        return
-            embed=disnake.Embed(title="Can't find that")    
-
-        await ctx.send(embed=embed)    
-    
     ## XXX TODO: Migrate to commands.Format
     @commands.command()
     async def format(self, ctx):
@@ -191,60 +167,68 @@ print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They
 """))
 
 
-
-
-if __name__ == "__main__":
-    intents = disnake.Intents.none()
-    intents.messages = True
-    intents.guilds = True
-    intents.members = True
-    try:
-        intents.presences = True
-        bot: commands.Bot = commands.Bot(
+class Globals:
+  intents = disnake.Intents.none()  
+  intents.messages = True
+  intents.guilds = True
+  intents.members = True
+  intents.presences = True
+  bot: commands.Bot = commands.Bot(
             command_prefix=Config.prefix,
             description=Phebe.__doc__,
             intents=intents,
-            help_command=None
-        )
-    except:
-        intents.presences = False
-        bot: commands.Bot = commands.Bot(
-            command_prefix=Config.prefix,
-            description=Phebe.__doc__,
-            intents=intents,
-            help_command=None
-        )
-    bot.add_cog(Phebe(bot))
+  )
+  cogs = {}
+  commands = {}
+  @classmethod
+  def load_cogs(cls):
+    phebe: Phebe = Phebe(cls.bot)
+    cls.cogs[type(phebe).__name__] = phebe
+    cls.bot.add_cog(phebe)
+    cls.commands.update({
+      c.name: c
+      for c in phebe.get_commands()
+    })
     
     dir: Path = Path("commands")
     for item in dir.iterdir():
         if item.name.endswith(".py"):
             name = f'{item.parent.name}.{item.stem}'
             print(f"Loading extension: {name}")
-            try:
-                bot.load_extension(name)
-            except BaseException as exc:
-                import traceback
-                print(
-                    "\x0a".join(
-                        traceback.format_exception(
-                            type(exc), exc, exc.__traceback__
-                        )
-                    ),
-                    file=sys.stderr
-                )
-    
-    t = Thread(target=StayAlive.start_server)
-    t.start()
+            before = set(cls.bot._CommonBotBase__cogs)
+            ext = cls.bot.load_extension(name)
+            for k in (
+             set(cls.bot._CommonBotBase__cogs) - before
+            ):
+              newcog = cls.bot._CommonBotBase__cogs[k]
+              cls.cogs[k] = newcog
+              cls.commands.update({
+                c.name: c
+                for c in newcog.get_commands()
+              })
+              print(f"Loaded cog '{k}' ({newcog})")
 
-    while True:
-        try:
-            bot.run(Config.token)
-        except disnake.errors.HTTPException:
-            import traceback, sys, os
-            traceback.print_exc(999, sys.stderr, True)
-            import threading
-            try:
-                threading.shutdown()
-            finally:
-                os._exit(255)
+  @classmethod
+  def start_threads(cls):
+    cls.stay_alive_thread = t = Thread(
+      target=StayAlive.start_server
+    )
+    t.start()
+    
+    cls.bot_thread = t2 = Thread(target=cls.run_bot)
+    t2.start()
+  
+  @classmethod
+  def run_bot(cls):
+    bot.run(Config.token)
+
+Globals.load_cogs()
+import asyncio
+login_rs = asyncio.run(Globals.bot.http.static_login(Config.token))
+print(login_rs)
+
+t = Thread(target=lambda: asyncio.run(
+    Globals.bot.start(Config.token)
+))
+t.start()
+
