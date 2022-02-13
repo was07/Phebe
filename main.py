@@ -99,9 +99,8 @@ class Phebe(commands.Cog):
         """Show latency in mili seconds"""
         await ctx.send(embed=disnake.Embed(
             title='Pong!',
-            description=f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms"),
-            color=""
-        )
+            description=f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms",
+        ))
 
     ## XXX TODO: Migrate to commands.Warn
     @commands.command()
@@ -171,82 +170,59 @@ print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They
         )
 
 
-class State:
+
+if __name__ == "__main__":
     intents = disnake.Intents.none()
     intents.messages = True
     intents.guilds = True
     intents.members = True
-    intents.presences = True
-    client_thread: Optional[Thread] = None
-    webserver_thread: Optional[Thread] = None
-    bot: commands.Bot = commands.Bot(
-        command_prefix=Config.prefix,
-        description=Phebe.__doc__,
-        intents=intents,
-    )
-    cogs = {}
-    commands = {}
-
-    @classmethod
-    def get_cogs(cls):
-        return cls.bot._CommonBotBase__cogs
-
-    @classmethod
-    def load_cogs(cls):
-        phebe: Phebe = Phebe(cls.bot)
-        cls.cogs[type(phebe).__name__] = phebe
-        cls.bot.add_cog(phebe)
-        cls.commands.update({c.name: c for c in phebe.get_commands()})
-
-        dir: Path = Path("commands")
-        for item in dir.iterdir():
-            if not item.name.endswith(".py"):
-                continue
-            name = f"{item.parent.name}.{item.stem}"
-            log.info("Loading extension: %s", name)
-            before = set(cls.get_cogs())
+    try:
+        intents.presences = True
+        bot: commands.Bot = commands.Bot(
+            command_prefix=Config.prefix,
+            description=Phebe.__doc__,
+            intents=intents,
+            help_command=None
+        )
+    except:
+        intents.presences = False
+        bot: commands.Bot = commands.Bot(
+            command_prefix=Config.prefix,
+            description=Phebe.__doc__,
+            intents=intents,
+            help_command=None
+        )
+    bot.add_cog(Phebe(bot))
+    
+    dir: Path = Path("commands")
+    for item in dir.iterdir():
+        if item.name.endswith(".py"):
+            name = f'{item.parent.name}.{item.stem}'
+            print(f"Loading extension: {name}")
             try:
-                cls.bot.load_extension(name)
-            except BaseException as ex:
-                rendered_list = traceback.format_exception(type(ex), ex, ex.__traceback__)
-                log.error("Command %r failed to load: \n%s\n\n", name, "\x0A".join(rendered_list))
-                continue
-            for k in set(cls.get_cogs()) - before:
-                newcog = cls.get_cogs()[k]
-                cls.cogs[k] = newcog
-                cls.commands.update({c.name: c for c in newcog.get_commands()})
-                log.info("Loaded cog %r (%s)", k, newcog)
+                bot.load_extension(name)
+            except BaseException as exc:
+                import traceback
+                print(
+                    "\x0a".join(
+                        traceback.format_exception(
+                            type(exc), exc, exc.__traceback__
+                        )
+                    ),
+                    file=sys.stderr
+                )
+    
+    t = Thread(target=StayAlive.start_server)
+    t.start()
 
-    @classmethod
-    def start_client(cls, run_blocking=False):
-        if cls.client_thread:
-            return
-        if run_blocking:
-            cls.bot.run(Config.token)
-        else:
-            cls.login_result = asyncio.run(cls.bot.http.static_login(Config.token))
-            log.info(f"logged in: {cls.login_result}")
-            cls.client_thread = Thread(target=lambda: asyncio.run(cls.bot.start(Config.token)))
-            cls.client_thread.start()
-            log.info("started client: %s", cls.client_thread)
-
-    @classmethod
-    def start_webserver(cls):
-        if cls.webserver_thread:
-            return
-        cls.webserver_thread = Thread(target=lambda: asyncio.run(State.bot.start(Config.token)))
-        cls.webserver_thread.start()
-        log.info("started websvr: %s", cls.webserver_thread)
-
-    @classmethod
-    def run_bot(cls):
-        bot.run(Config.token)
-
-
-if not "thread" in globals():
-    State.load_cogs()
-    log.info(f"loaded {len(State.cogs)} cogs")
-    log.info(f"loaded {len(State.commands)} commands")
-    State.start_client(run_blocking=__name__ == "__main__")
-    if __name__ == "__main__":
-        State.start_webserver()
+    while True:
+        try:
+            bot.run(Config.token)
+        except disnake.errors.HTTPException:
+            import traceback, sys, os
+            traceback.print_exc(999, sys.stderr, True)
+            import threading
+            try:
+                threading.shutdown()
+            finally:
+                os._exit(255)
