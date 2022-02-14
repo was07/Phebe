@@ -285,9 +285,9 @@ class Wiki(commands.Cog):
         self.bot = bot
         type(self).__cog_name__ = "More"
 
-    @commands.command()
-    async def wiki(self, ctx, *, name=""):
-        await ctx.send(embed=self._do_wiki(name))
+    @commands.command(help='Get the Wikipedia article about a subject')
+    async def wiki(self, ctx, *, subject=""):
+        await ctx.send(embed=self._do_wiki(subject))
     
     def _do_wiki(self, name) -> Embed:
         results: WikiSearchResult = search_wiki(name)

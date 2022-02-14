@@ -67,16 +67,20 @@ class Server(commands.Cog):
     
     @commands.command()
     async def rules(self, ctx: Context):
+        await ctx.send(embed=disnake.Embed(
+                title=f'Rules',
+                url=rules_channel,
+            )
+        )
         return
-    
-    # serverinfo
-    @commands.command()
-    async def serverinfo(self, ctx: Context) -> None:
+
+    @commands.command(help='Get information about server', aliases=['serverinfo'])
+    async def server(self, ctx: Context) -> None:
         guild = ctx.guild
         
         offline_members = 0
         online_members = 0
-        lan_ip = get_lan_ip()
+
         sysname, nodename, release, version, arch = uname()
 
         for member in guild.members:
@@ -101,7 +105,3 @@ class Server(commands.Cog):
             text=f"Server: {sysname} on {arch}"
         )
         await ctx.send(embed=embed)
-
-#
-#
-        

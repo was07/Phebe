@@ -21,15 +21,40 @@ class MyHelpCommand(commands.DefaultHelpCommand):
     def get_command_signature(self, command):
         return f"{self.clean_prefix}" f"{command.qualified_name} " f"{command.signature}"
 
-    @override
-    async def send_pages(self):
-        destination = self.get_destination()
-        log.info("send_pages: destination=%s", destination)
-        for page in self.paginator.pages:
-            page = page.strip().strip("```")
-            log.info("page=%s", page)
-            emby = Embed(description=page)
-            await destination.send(embed=emby)
+    # @override
+    # async def send_pages(self):
+    #     destination = self.get_destination()
+    #     log.info("send_pages: destination=%s", destination)
+    #     for page in self.paginator.pages:
+    #         page = page.strip().strip("```")
+    #         log.info("page=%s", page)
+    #         emby = Embed(description=page)
+    #         await destination.send(embed=emby)
+
+    async def send_bot_help(self, mapping):
+        embed = disnake.Embed(title='help')
+        
+        for cog, commands in mapping.items():
+            commands = await self.filter_commands(commands, sort=True)
+            command_signatures = [self.get_command_signature(c) for c in commands]
+            if command_signatures:
+                cog_name = getattr(cog, "qualified_name", "No Category")
+                txt = ''
+                for c in commands:
+                    txt += '\n`'+self.get_command_signature(c)+'`'
+                embed.add_field(name=cog_name, value=txt)
+        
+        await self.context.send(embed=embed)
+    
+    async def send_command_help(self, command):
+        embed = disnake.Embed(title=self.get_command_signature(command))
+        embed.add_field(name="Help", value=command.help)
+        alias = command.aliases
+        if alias:
+            embed.add_field(name="Aliases", value=", ".join(alias), inline=False)
+
+        channel = self.get_destination()
+        await channel.send(embed=embed)
 
 
 class Help(commands.Cog):

@@ -27,21 +27,6 @@ from typing import Optional
 
 banned_words = ["@everyone", "@here"]
 
-hlp = {
-    "Python": {
-        "d": ("(symbol)", "Get the Python documentation for a given symble"),
-        "e": ("(code)", "Evaluate or run Python code and see output"),
-        "pypi": ("(name)", "Get the description of a pip module")
-    },
-    "Server": {
-        "rule": ("(number)", "Get a specific rule of the server"),
-        "serverinfo": ("", "Get some information about the server")
-    },
-    "More": {
-        "wiki": ("(subject)", "Get the Wikipedia page of a subject")
-    }
-}
-
 
 class Phebe(commands.Cog):
     """
@@ -60,11 +45,11 @@ class Phebe(commands.Cog):
     ## XXX TODO: Migrate to commands.WordFilter
     @commands.Cog.listener()
     async def on_message(self, message):
-        author: Member = member_for(message.author)
+        author: Member = message.author
         if author.bot:
             return
-        roles_by_name: dict[str,Role] = role_names(author)
-        if "Moderation-Team" in roles_by_name:
+        roles_by_name = [role.name for role in author.roles]
+        if "Moderation Team" in roles_by_name:
             return
         for word in banned_words:
             if word in message.content.lower():

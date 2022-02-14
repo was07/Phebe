@@ -26,15 +26,24 @@ User
 
 def member_for(user: Union[User, Member]) -> Member:
     "Return the full Member object corresponding to `user`."
+    print(f"member_for({user})")
     if isinstance(user, Member):
         return user
     from __main__ import bot
-    return [m for m in bot.guilds[0].members if m.id == user.id][0] # XXX: FIXME Need bot.
-
-
-def role_names(user: Union[User, Member]) -> dict[str, Role]:
-    "Return a dict mapping role names to Role objects."
-    return {r.name: r for r in member_for(user).roles}
+    return 
+    print(f"member_for(user={user}): looking for member with ID {user.id}")
+    for g in bot.guilds:
+        ids = [int(str(m.id)) for m in g.members]
+        if int(str(user.id)) in ids:
+            print(f"{g }{ids}")
+        matching = [m for m in g.members if m.id == user.id]
+        if matching:
+            return matching[0]
+    raise RuntimeError(f"uid {user} not found.")
+    
+    def role_ames(user: Union[User, Member]) -> dict[str, Role]:
+        "Return a dict mapping role names to Role objects."
+        return {r.name: r for r in member_for(user).roles}
 
 
 def setup(bot: commands.Bot):

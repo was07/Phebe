@@ -19,9 +19,8 @@ class Python(commands.Cog):
         type(self).__cog_name__ = "Python"
 
 
-    @commands.command()
-    async def e(self, ctx, *, source: str=""):
-        """Run and get output of a python code"""
+    @commands.command(help='Run/Evaluate Python code', aliases=['eval'])
+    async def  e(self, ctx, *, source: str=""):
         if ctx.author.id == 883987539961192508:  # 00001H
             await ctx.reply("Sorry, Eval is not available, **for you.**")
             return
@@ -70,8 +69,8 @@ class Python(commands.Cog):
         ))
 
 
-    @commands.command()
-    async def d(self, ctx, symbol: str='', nparas: int=1):
+    @commands.command(help='Get the Documentation of a python object' , aliases=['doc'])
+    def d(self, ctx, symbol: str='', nparas: int=1):
         """Get the Documentation of a python object"""
         symbol = symbol.strip('`')
         if symbol == 'Creds':
@@ -87,7 +86,7 @@ class Python(commands.Cog):
             ))
 
     
-    @commands.command(alias="pypi")
+    @commands.command(help='Get the documentation of a python object', alias="pypi")
     async def pypi(self, ctx, name=None):
         if name is None:
             await ctx.send('Package name required.')
