@@ -18,9 +18,8 @@ class Python(commands.Cog):
         self.bot = bot
         type(self).__cog_name__ = "Python"
 
-
     @commands.command(help='Run/Evaluate Python code', aliases=['eval'])
-    async def  e(self, ctx, *, source: str=""):
+    async def e(self, ctx, *, source: str=""):
         if ctx.author.id == 883987539961192508:  # 00001H
             await ctx.reply("Sorry, Eval is not available, **for you.**")
             return
@@ -68,9 +67,8 @@ class Python(commands.Cog):
             color=color,
         ))
 
-
     @commands.command(help='Get the Documentation of a python object' , aliases=['doc'])
-    def d(self, ctx, symbol: str='', nparas: int=1):
+    async def d(self, ctx, symbol: str='', nparas: int=1):
         """Get the Documentation of a python object"""
         symbol = symbol.strip('`')
         if symbol == 'Creds':

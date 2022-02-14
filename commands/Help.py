@@ -56,6 +56,15 @@ class MyHelpCommand(commands.DefaultHelpCommand):
         channel = self.get_destination()
         await channel.send(embed=embed)
 
+    async def send_group_help(self, group):
+        cmds = self.get_bot_mapping()
+        
+        embed = Embed(
+            title=group,
+        )
+        channel = self.get_destination()
+        await channel.send(embed=embed)
+
 
 class Help(commands.Cog):
     @override
