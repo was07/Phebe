@@ -27,6 +27,6 @@ class Ban(commands.Cog):
         for ban_entry in banned_users:
             if member == ban_entry.user.id:
                 ctx.guild.unban(ban_entry.user)
-                await ctx.guild.unban(U(int(member)), reason=f"Unbanned by {ctx.author.display_name} (id={ctx.author.id})")
+                await ctx.guild.unban(int(member), reason=f"Unbanned by {ctx.author.display_name} (id={ctx.author.id})")
                 await ctx.send(f"**{member.name}** got unbanned successfully!")
                 return
