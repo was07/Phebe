@@ -23,7 +23,7 @@ import StayAlive
 from colorama import Fore
 from init import Config
 from base import *
-from typing import Optional
+
 
 banned_words = ["@everyone", "@here"]
 
