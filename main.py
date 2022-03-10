@@ -20,7 +20,6 @@ import random
 from threading import Thread
 import asyncio
 import StayAlive
-from colorama import Fore
 from init import Config
 from base import *
 
@@ -38,8 +37,7 @@ class Phebe(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         """show message when bot gets online"""
-        print(Fore.BLUE +
-              f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms')
+        print("\u001b[34m" + f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms' + "\u001b[0m")
         self.bot.loop.create_task(self.status_task())
     
     ## XXX TODO: Migrate to commands.WordFilter
