@@ -1,15 +1,19 @@
-from flask import Flask, Response, Request, jsonify, request
-
+from flask import Flask, jsonify, request
 from threading import Thread
 from time import sleep
+import inspect
+import json
+import asyncio
 import logging
+import websockets
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 
 app = Flask("")
 
-import inspect
+
 @app.route("/")
 def index():
     return """
@@ -40,19 +44,18 @@ def index():
 </div>
     """
 
-def log_request(the_request):
-    for k, v in inspect.getmembers(the_request):
+
+def log_request(request):
+    for k, v in inspect.getmembers(request):
         try:
             log.info("%s=%s", k, v)
-        except Exception as e:
+        except:
             log.info("%s=%s", k, type(v).__qualname__)
-    
+
+
 @app.route("/api", methods=['GET'])
 def api():
     log_request(request)
-    import requests
-    import json, asyncio
-    wwebsockets = __import__("websockets")
     el = asyncio.get_event_loop_policy().get_event_loop()
     wsc = el.run_until_complete(websockets.connect("wss://gateway.discord.gg/?v=9&encoding=json"))
     print(wsc)
@@ -73,20 +76,24 @@ def api():
     print(data)
     return jsonify(dat)
 
-@app.route("/api/lpgin", methods=['GET', 'POST'])
+
+@app.route("/api/login", methods=['GET', 'POST'])
 def login():
     log_request(request)
     return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+
 
 @app.route("/login/service/discord/callback", methods=['GET', 'POST'])
 def discord_callback():
     log_request(request)
     return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
 
+
 @app.route("/api/interactions", methods=['GET','POST'])
 def interact():
     log_request(request)
     return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+
 
 def start_server():
   if is_server_running():
@@ -94,8 +101,11 @@ def start_server():
   app.run(host='0.0.0.0', port=8080)
   return "Server started"
 
+
 def is_server_running():
+  # hmmmm
   return False
+
 
 stop_keepalive = False
 def keepalive():
@@ -105,6 +115,7 @@ def keepalive():
     sleep(10)
   print("keepalive stopping")
   stop_keepalive = False
+
 
 def check():
   if is_server_running():
