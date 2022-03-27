@@ -1,8 +1,6 @@
 class FakeStream(__import__("io").StringIO):
-  
-  def fileno(self):
-    return 1
-
+    def fileno(self):
+        return 1
 
 def _t():
   import types, sys
