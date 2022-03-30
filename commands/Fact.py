@@ -3,14 +3,17 @@ from base import *
 from factgen import random_fact
 
 
-
 class Fact(commands.Cog):
+    """The cog for facts."""
+
     def __init__(self, bot: Bot):
         super().__init__()
         self.bot = bot
 
     @commands.command()
     async def fact(self, ctx):
+        """Shows you a random fact."""
+
         text, source = random_fact()
 
         embed = Embed(

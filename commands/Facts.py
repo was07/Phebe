@@ -1,16 +1,21 @@
 from random import randint
 from replit import db
 from base import *
+
 # overnotice:just tring to make something that i am not even sure
 
 # gives and tell facts about something that user is asking for
 class Facts(commands.Cog):
+    """Facts... again?"""
+
     def __init__(self, bot: Bot):
         super().__init__()
         self.bot = bot
 
     @commands.command()
     async def facts(self, ctx):
+        """Whales, indeed, are big."""
+
         p = (1, 100)
         await ctx.send(p)
         await ctx.send("whales are big")

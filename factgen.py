@@ -1,11 +1,12 @@
-def random_fact():
-    from pathlib import Path
-    import json, random, requests
+import json
+import random
+import requests
+from pathlib import Path
 
+
+def random_fact():
     factfile = Path("facts.json")
     if not factfile.exists():
-        import requests
-
         facts = requests.get(
             "https://randomwordgenerator.com/json/facts.json",
             headers={
@@ -18,6 +19,7 @@ def random_fact():
     text = fact["fact"]
     source = fact["source_url"]
     return text, source
+
 
 text, source = random_fact()
 print(text)

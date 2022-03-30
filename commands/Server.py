@@ -43,12 +43,16 @@ def safe_limit(s: Union[str, bytes]) -> str:
 
 
 class Server(commands.Cog):
+    """The cog for the Pythonic Hangout server related things."""
+
     def __init__(self, bot: Bot) -> None:
         super().__init__()
         self.bot = bot
 
     @commands.command()
     async def rule(self, ctx: Context, number: int):
+        """Shows you the specified rule with that index."""
+
         if not 0 < number < len(rules) + 1:
             return
 
@@ -60,6 +64,8 @@ class Server(commands.Cog):
 
     @commands.command()
     async def rules(self, ctx: Context):
+        """Shows you all of the rules."""
+
         await ctx.send(
             embed=disnake.Embed(
                 title=f"Rules",
@@ -70,6 +76,8 @@ class Server(commands.Cog):
 
     @commands.command(help="Get information about server", aliases=["serverinfo"])
     async def server(self, ctx: Context) -> None:
+        """Shows you the info of the server."""
+
         guild = ctx.guild
 
         offline_members = 0
