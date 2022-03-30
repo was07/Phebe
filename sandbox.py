@@ -3,7 +3,8 @@ class FakeStream(__import__("io").StringIO):
         return 1
 
 def _t():
-  import types, sys
+  import sys
+  import types
   from collections.abc import Mapping
   __sys_mod = sys.modules
   _ModDict__sys_mod = __sys_mod
@@ -132,13 +133,11 @@ def _t():
   
   global __name__
   if __name__ == "__main__":
-    import builtins, sys
+    import builtins
+    import sys
     sys.addaudithook(audit_hook)
     code = compile(sys.stdin.read(), "<eval command>", "exec")
-    import builtins 
-
-
-
+    import builtins
 
     #del __import__
 

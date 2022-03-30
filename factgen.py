@@ -1,6 +1,9 @@
 def random_fact():
+  import json
+  import random
   from pathlib import Path
-  import json, random, requests
+
+  import requests
   factfile = Path("facts.json")
   if not factfile.exists():
     import requests 

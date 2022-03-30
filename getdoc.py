@@ -1,18 +1,22 @@
-import aiohttp
 import asyncio
+
+import aiohttp
 import nest_asyncio
+
 nest_asyncio.apply()
 
-import re
-import requests
 import functools
+import re
 from itertools import islice
 from typing import Optional, TypeVar
-from init import Formatted
-from sphobjinv.inventory import Inventory
-from sphobjinv.data import DataObjStr
+
+import requests
 from bs4 import BeautifulSoup as BS
 from bs4.element import NavigableString, PageElement, Tag
+from sphobjinv.data import DataObjStr
+from sphobjinv.inventory import Inventory
+
+from init import Formatted
 
 HtmlStr = TypeVar("HtmlStr", bound = str)
 Url = TypeVar("Url", bound = str)

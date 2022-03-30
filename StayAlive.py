@@ -1,11 +1,12 @@
-from flask import Flask, jsonify, request
-from threading import Thread
-from time import sleep
+import asyncio
 import inspect
 import json
-import asyncio
 import logging
+from threading import Thread
+from time import sleep
+
 import websockets
+from flask import Flask, jsonify, request
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)

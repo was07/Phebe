@@ -1,16 +1,19 @@
-from base import *
-import bs4, re, requests
-from bs4 import BeautifulSoup as BS, Tag, TemplateString
-from bs4.builder import FAST, HTMLParserTreeBuilder
-from functools import lru_cache
-from typing import Any, Optional, Union
-from urllib.parse import ParseResult, urljoin, urlparse, quote
-from requests import get
-from itertools import starmap
-from typing import NamedTuple
-from furl import furl as URL
+import re
 from enum import Enum
-from typing import Callable, TypeVar
+from functools import lru_cache
+from itertools import starmap
+from typing import Any, Callable, NamedTuple, Optional, TypeVar, Union
+from urllib.parse import ParseResult, quote, urljoin, urlparse
+
+import bs4
+import requests
+from bs4 import BeautifulSoup as BS
+from bs4 import Tag, TemplateString
+from bs4.builder import FAST, HTMLParserTreeBuilder
+from furl import furl as URL
+from requests import get
+
+from base import *
 
 TFunc = TypeVar("TFunc", bound=Callable)
 
