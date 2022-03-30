@@ -6,9 +6,14 @@ from disnake.ext.commands.core import Command
 
 log = getLogger(__name__)
 
-def override(func): return func
+
+def override(func):
+    return func
+
 
 class MyHelpCommand(commands.DefaultHelpCommand):
+    """The cog for the help command."""
+
     def __init__(self, **options):
         self.clean_prefix = options.pop("prefix")
         self.width = options.pop("width", 80)

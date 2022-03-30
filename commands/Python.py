@@ -15,6 +15,8 @@ from init import Formatted
 
 
 class Python(commands.Cog):
+    """The cog for Python code."""
+
     def __init__(self, bot: Bot) -> None:
         super().__init__()
         self.bot = bot

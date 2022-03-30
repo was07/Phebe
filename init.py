@@ -8,12 +8,15 @@ from bs4.element import Tag
 if sys.version_info < (3, 9):
     import gc
     from typing import _GenericAlias as GenericAlias
+
     for t in (list, dict, set, tuple, frozenset):
         r = gc.get_referents(t.__dict__)[0]
         r["__class_getitem__"] = classmethod(GenericAlias)
 
 
 class Config:
+    """Represents a configuration for this bot."""
+
     sentinel = object()
 
     def __init__(self):
