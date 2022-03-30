@@ -31,15 +31,20 @@ class Phebe(commands.Cog):
     """
     Official bot for the Pythonic Hangout server
     """
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
         """show message when bot gets online"""
-        print("\u001b[34m" + f'[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms' + "\u001b[0m")
+        print(
+            "\u001b[34m"
+            + f"[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms"
+            + "\u001b[0m"
+        )
         self.bot.loop.create_task(self.status_task())
-    
+
     ## XXX TODO: Migrate to commands.WordFilter
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -54,36 +59,33 @@ class Phebe(commands.Cog):
                 await message.delete()
                 await message.author.send(
                     embed=disnake.Embed(
-                        title='Warning',
-                        description=f"**{author.mention}: Your message got deleted by saying** *{word}* __that is a banned word.__")
+                        title="Warning",
+                        description=f"**{author.mention}: Your message got deleted by saying** *{word}* __that is a banned word.__",
                     )
-    
+                )
+
     ## XXX TODO: Migrate to commands.Status
     async def status_task(self):
         if Config.prefix == ".":
-            return    
+            return
         for activity in (
             Game(name=".help"),
-            Activity(
-                type=ActivityType.watching,
-                name="Members in Servers"
-            ),
-            Activity(
-                type=ActivityType.listening,
-                name="Moderation team command."
-            )
+            Activity(type=ActivityType.watching, name="Members in Servers"),
+            Activity(type=ActivityType.listening, name="Moderation team command."),
         ):
             await self.bot.change_presence(activity=activity)
             await asyncio.sleep(30)
-    
+
     ## XXX TODO: Migrate to commands.Ping
     @commands.command()
     async def ping(self, ctx):
         """Show latency in mili seconds"""
-        await ctx.send(embed=disnake.Embed(
-            title='Pong!',
-            description=f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms",
-        ))
+        await ctx.send(
+            embed=disnake.Embed(
+                title="Pong!",
+                description=f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms",
+            )
+        )
 
     ## XXX TODO: Migrate to commands.Warn
     @commands.command()
@@ -96,19 +98,17 @@ class Phebe(commands.Cog):
     async def timeout(self, ctx, time, member: disnake.Member = None):
         """Timeout a User"""
         await member.timeout(duration=time)
-    
+
     ## XXX TODO: Migrate to commands.PFP
     @commands.command()
     async def pfp(self, ctx, member: disnake.Member = None):
         """Show profile picture of a user, or see yours"""
 
         embed = disnake.Embed(
-            title=
-            f'Profile Picture of {ctx.author.display_name if member is None else member.display_name}'
+            title=f"Profile Picture of {ctx.author.display_name if member is None else member.display_name}"
         )
 
-        embed.set_image(
-            url=ctx.author.avatar if member is None else member.avatar)
+        embed.set_image(url=ctx.author.avatar if member is None else member.avatar)
         await ctx.send(embed=embed)
 
     ## XXX TODO: Migrate to commands.Flip
@@ -121,7 +121,7 @@ class Phebe(commands.Cog):
         res = random.randint(1, 2)
 
         embed = disnake.Embed(
-            title='Flipped a coin',
+            title="Flipped a coin",
             description=f"**{('Heads' if res == 1 else 'Tails')}**",
         )
 
@@ -135,7 +135,9 @@ class Phebe(commands.Cog):
         """roll a virtual dice and get the result"""
         comp = random.randint(1, 6)
 
-        await ctx.reply(embed=disnake.Embed(title="Rolled a dice", description=f"Result is {comp}"))
+        await ctx.reply(
+            embed=disnake.Embed(title="Rolled a dice", description=f"Result is {comp}")
+        )
 
     ## XXX TODO: Migrate to commands.Format
     @commands.command()
@@ -153,7 +155,6 @@ print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They
         )
 
 
-
 if __name__ == "__main__":
     intents = disnake.Intents.none()
     intents.messages = True
@@ -165,7 +166,7 @@ if __name__ == "__main__":
             command_prefix=Config.prefix,
             description=Phebe.__doc__,
             intents=intents,
-            help_command=None
+            help_command=None,
         )
     except:
         intents.presences = False
@@ -173,28 +174,27 @@ if __name__ == "__main__":
             command_prefix=Config.prefix,
             description=Phebe.__doc__,
             intents=intents,
-            help_command=None
+            help_command=None,
         )
     bot.add_cog(Phebe(bot))
-    
+
     dir: Path = Path("commands")
     for item in dir.iterdir():
         if item.name.endswith(".py"):
-            name = f'{item.parent.name}.{item.stem}'
+            name = f"{item.parent.name}.{item.stem}"
             print(f"Loading extension: {name}")
             try:
                 bot.load_extension(name)
             except BaseException as exc:
                 import traceback
+
                 print(
                     "\x0a".join(
-                        traceback.format_exception(
-                            type(exc), exc, exc.__traceback__
-                        )
+                        traceback.format_exception(type(exc), exc, exc.__traceback__)
                     ),
-                    file=sys.stderr
+                    file=sys.stderr,
                 )
-    
+
     t = Thread(target=StayAlive.start_server)
     t.start()
 
@@ -203,8 +203,10 @@ if __name__ == "__main__":
             bot.run(Config.token)
         except disnake.errors.HTTPException:
             import traceback, sys, os
+
             traceback.print_exc(999, sys.stderr, True)
             import threading
+
             try:
                 threading.shutdown()
             finally:

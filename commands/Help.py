@@ -1,8 +1,14 @@
 from base import *
-def override(func): return func
+
+
+def override(func):
+    return func
+
+
 from logging import getLogger
 from init import Config
 from disnake.ext.commands.help import Paginator
+
 log = getLogger(__name__)
 from disnake.ext.commands.core import Command
 
@@ -21,29 +27,31 @@ class MyHelpCommand(commands.DefaultHelpCommand):
 
     @override
     def get_command_signature(self, command):
-        return f"{self.clean_prefix}" f"{command.qualified_name} " f"{command.signature}"
-        
+        return (
+            f"{self.clean_prefix}" f"{command.qualified_name} " f"{command.signature}"
+        )
+
     async def send_bot_help(self, mapping):
-        embed = disnake.Embed(title='help')
-        
+        embed = disnake.Embed(title="help")
+
         for cog, commands in mapping.items():
             commands = await self.filter_commands(commands, sort=True)
             command_signatures = [self.get_command_signature(c) for c in commands]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
-                txt = ''
+                txt = ""
                 for c in commands:
-                    txt += '\n`'+self.get_command_signature(c)+'`'
+                    txt += "\n`" + self.get_command_signature(c) + "`"
                 embed.add_field(name=cog_name, value=txt)
 
         channel = self.get_destination()
         await channel.send(embed=embed)
-    
+
     async def send_cog_help(self, cog):
         commands: list[Command] = cog.get_commands()
         print(commands)
         return await super().send_cog_help(cog)
-        
+
     async def send_command_help(self, command):
         embed = disnake.Embed(title=self.get_command_signature(command))
         embed.add_field(name="Help", value=command.help)
@@ -57,12 +65,13 @@ class MyHelpCommand(commands.DefaultHelpCommand):
     async def send_group_help(self, group):
         commands: list[Command] = group.commands
         print(commands)
-        
+
         embed = Embed(
             title=group,
         )
         channel = self.get_destination()
         await channel.send(embed=embed)
+
 
 class Help(commands.Cog):
     @override

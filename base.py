@@ -11,6 +11,7 @@ from disnake.user import User
 from typing import Union
 import disnake
 import sys
+
 # for replit
 disnake
 commands
@@ -30,7 +31,8 @@ def member_for(user: Union[User, Member]) -> Member:
     if isinstance(user, Member):
         return user
     from __main__ import bot
-    return 
+
+    return
     print(f"member_for(user={user}): looking for member with ID {user.id}")
     for g in bot.guilds:
         ids = [int(str(m.id)) for m in g.members]
@@ -40,7 +42,7 @@ def member_for(user: Union[User, Member]) -> Member:
         if matching:
             return matching[0]
     raise RuntimeError(f"uid {user} not found.")
-    
+
     def role_ames(user: Union[User, Member]) -> dict[str, Role]:
         "Return a dict mapping role names to Role objects."
         return {r.name: r for r in member_for(user).roles}
@@ -53,9 +55,10 @@ def setup(bot: commands.Bot):
     function
     """
     import builtins
+
     if bot and "bot" not in vars(builtins):
         builtins.bot = bot
-    
+
     module_name = [k for k in sys.modules.keys() if k.startswith("commands")][-1]
     class_name = module_name.split(".")[-1]
     module = sys.modules.get(module_name)
