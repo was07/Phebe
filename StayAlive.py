@@ -54,73 +54,91 @@ def log_request(request):
             log.info("%s=%s", k, type(v).__qualname__)
 
 
-@app.route("/api", methods=['GET'])
+@app.route("/api", methods=["GET"])
 def api():
     log_request(request)
     el = asyncio.get_event_loop_policy().get_event_loop()
-    wsc = el.run_until_complete(websockets.connect("wss://gateway.discord.gg/?v=9&encoding=json"))
+    wsc = el.run_until_complete(
+        websockets.connect("wss://gateway.discord.gg/?v=9&encoding=json")
+    )
     print(wsc)
-    el.run_until_complete(wsc.send(json.dumps(dat := (
-        {
-            "op": 2,
-            "d": {
-                "token": request.json()['token'],
-                "intents": 513,
-                "properties": {
-                    "$os": "linux", "$browser": "my_library", "$device": "my_library"
-                }
-            }
-        } 
-    ))))
+    el.run_until_complete(
+        wsc.send(
+            json.dumps(
+                dat := (
+                    {
+                        "op": 2,
+                        "d": {
+                            "token": request.json()["token"],
+                            "intents": 513,
+                            "properties": {
+                                "$os": "linux",
+                                "$browser": "my_library",
+                                "$device": "my_library",
+                            },
+                        },
+                    }
+                )
+            )
+        )
+    )
     raw = el.run_until_complete(wsc.recv())
     data = json.loads(raw)
     print(data)
     return jsonify(dat)
 
 
-@app.route("/api/login", methods=['GET', 'POST'])
+@app.route("/api/login", methods=["GET", "POST"])
 def login():
     log_request(request)
-    return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+    return jsonify(
+        {"status": "OK", "data": request.data.decode("ISO8859-1"), "url": request.url}
+    )
 
 
-@app.route("/login/service/discord/callback", methods=['GET', 'POST'])
+@app.route("/login/service/discord/callback", methods=["GET", "POST"])
 def discord_callback():
     log_request(request)
-    return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+    return jsonify(
+        {"status": "OK", "data": request.data.decode("ISO8859-1"), "url": request.url}
+    )
 
 
-@app.route("/api/interactions", methods=['GET','POST'])
+@app.route("/api/interactions", methods=["GET", "POST"])
 def interact():
     log_request(request)
-    return jsonify({'status': 'OK', 'data': request.data.decode("ISO8859-1"), "url": request.url})
+    return jsonify(
+        {"status": "OK", "data": request.data.decode("ISO8859-1"), "url": request.url}
+    )
 
 
 def start_server():
-  if is_server_running():
-    return "Server is already running"
-  app.run(host='0.0.0.0', port=8080)
-  return "Server started"
+    if is_server_running():
+        return "Server is already running"
+    app.run(host="0.0.0.0", port=8080)
+    return "Server started"
 
 
 def is_server_running():
-  # hmmmm
-  return False
+    # hmmmm
+    return False
 
 
 stop_keepalive = False
+
+
 def keepalive():
-  global stop_keepalive
-  while not stop_keepalive:
-    check()
-    sleep(10)
-  print("keepalive stopping")
-  stop_keepalive = False
+    global stop_keepalive
+    while not stop_keepalive:
+        check()
+        sleep(10)
+    print("keepalive stopping")
+    stop_keepalive = False
 
 
 def check():
-  if is_server_running():
-    print("Server is running")
-    return
-  th = Thread(target=keepalive)
-  th.start()
+    if is_server_running():
+        print("Server is running")
+        return
+    th = Thread(target=keepalive)
+    th.start()

@@ -17,13 +17,14 @@ from base import *
 
 TFunc = TypeVar("TFunc", bound=Callable)
 
+
 def cache(func: TFunc) -> TFunc:
     return lru_cache(maxsize=0)(func)
 
 
 class WikiProfile(Enum):
     """
-    Search profile to use. 
+    Search profile to use.
       - `STRICT`: Strict profile with few punctuation
         characters removed but diacritics and stress marks
         are kept.
@@ -40,13 +41,15 @@ class WikiProfile(Enum):
     Source: <http://wikipedia.org
             /w/api.php?action=help&modules=opensearch>
     """
+
     STRICT = "strict"
     NORMAL = "normal"
     FAST_FUZZY = "fast-fuzzy"
     CLASSIC = "classic"
     ENGINE_AUTOSELECT = "engine_autoselect"
     FUZZY = "fuzzy"
-    
+
+
 class WikiRedirectMode(Enum):
     """
     How to handle redirects.
@@ -54,12 +57,15 @@ class WikiRedirectMode(Enum):
       - `RESOLVE` - Return the target page. May return fewer
          than limit results.
     """
+
     RETURN = "return"
     RESOLVE = "resolve"
-    
+
+
 class WikiSearchResult(NamedTuple):
     title: str
     url: URL
+
 
 class WikiImageResult(NamedTuple):
     pageid: str
@@ -71,21 +77,22 @@ class WikiImageResult(NamedTuple):
     scheme: str
     filename: str
 
-@cache
-def search_wiki(query: str,
-                *,
-                profile: WikiProfile=WikiProfile.NORMAL,
-                redirects: WikiRedirectMode=WikiRedirectMode.RESOLVE,
-                max_results: int=10,) -> list[WikiSearchResult]:
 
-    wiki_api_url: URL = URL(
-        "http://en.wikipedia.org/w/api.php"
-    )
+@cache
+def search_wiki(
+    query: str,
+    *,
+    profile: WikiProfile = WikiProfile.NORMAL,
+    redirects: WikiRedirectMode = WikiRedirectMode.RESOLVE,
+    max_results: int = 10,
+) -> list[WikiSearchResult]:
+
+    wiki_api_url: URL = URL("http://en.wikipedia.org/w/api.php")
     resp = get(
         wiki_api_url.url,
         headers={
             "User-Agent": "Mozilla/5.0 (Windows NT 6.1; "
-            "WOW64) AppleWebKit/537.36 (KHTML, like Gecko) " 
+            "WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/33.0.1750.154 Safari/537.36",
             "Referer": wiki_api_url.url,
             "Accept": "application/json",
@@ -101,28 +108,26 @@ def search_wiki(query: str,
     )
     if resp.status_code != 200:
         raise Exception()
-    
+
     return [
         *starmap(
-            lambda title, url: 
-                WikiSearchResult(title, URL(url)),
+            lambda title, url: WikiSearchResult(title, URL(url)),
             zip(*resp.json()[1::2]),
         )
     ]
 
-@cache
-def get_wiki_images(result: WikiSearchResult,
-                    *,
-                    min_results: int=1) -> list[WikiImageResult]:
 
-    wiki_api_url: URL = URL(
-        "http://en.wikipedia.org/w/api.php"
-    )
+@cache
+def get_wiki_images(
+    result: WikiSearchResult, *, min_results: int = 1
+) -> list[WikiImageResult]:
+
+    wiki_api_url: URL = URL("http://en.wikipedia.org/w/api.php")
     resp = get(
         wiki_api_url.url,
         headers={
             "User-Agent": "Mozilla/5.0 (Windows NT 6.1; "
-            "WOW64) AppleWebKit/537.36 (KHTML, like Gecko) " 
+            "WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/33.0.1750.154 Safari/537.36",
             "Referer": wiki_api_url.url,
             "Accept": "application/json",
@@ -142,9 +147,7 @@ def get_wiki_images(result: WikiSearchResult,
         pageid = page["pageid"]
         page_title = page["title"]
         del page["ns"]
-        images: list[dict[str,Union[int,str]]] = (
-            page["images"]
-        )
+        images: list[dict[str, Union[int, str]]] = page["images"]
         for image in images:
             ns = image["ns"]
             im_title = image["title"]
@@ -152,18 +155,15 @@ def get_wiki_images(result: WikiSearchResult,
             scheme, _, filename = im_title.partition(":")
             href = None
             if scheme == "File":
-                file_info_url = URL(
-                    f"http://commons.wikimedia.org"
-                    f"/wiki/{im_title}"
-                )
+                file_info_url = URL(f"http://commons.wikimedia.org" f"/wiki/{im_title}")
                 doc = BS(requests.get(file_info_url).content)
                 for anchor in doc.select(
-                  "div.fullMedia "
-                  "a[href*=\"{filename}\"], "
-                  "div.fullMedia "
-                  "a[href*=\"{quote(filename)}\"], "
-                  "div.fullMedia "
-                  "a.internal[href]"
+                    "div.fullMedia "
+                    'a[href*="{filename}"], '
+                    "div.fullMedia "
+                    'a[href*="{quote(filename)}"], '
+                    "div.fullMedia "
+                    "a.internal[href]"
                 ):
                     href = URL(anchor.attrs.get("href"))
                     break
@@ -183,14 +183,13 @@ def get_wiki_images(result: WikiSearchResult,
     return im_results
 
 
-
 class HtmlToDiscord:
     url: str
     doc: Union[BS, Tag]
     html: str
     thumbnail: str
     title: str
-    
+
     format_map = {
         "b,strong": "**{text}**",
         "i,em": "*{text}*",
@@ -199,11 +198,11 @@ class HtmlToDiscord:
         "p": "\x0A{html}\x0A",
         "sup": "",
     }
-    
+
     def __init__(
         self,
         html: Union[str, bytes, BS, Tag],
-        url: Optional[str]=None,
+        url: Optional[str] = None,
     ):
         self._url = url
         self._doc = None
@@ -217,23 +216,23 @@ class HtmlToDiscord:
         elif isinstance(html, (BS, Tag)):
             self._doc = html
         else:
-            raise ValueError(f"html must be one of: {type(self).__init__.__annotations__}")
-    
+            raise ValueError(
+                f"html must be one of: {type(self).__init__.__annotations__}"
+            )
+
     @staticmethod
     @lru_cache(maxsize=0)
     def parse(html: str) -> BS:
         builder = HTMLParserTreeBuilder(FAST)
-        builder.preserve_whitespace_tags |= {
-            'p', 'span', 'div', 'tt', 'code'
-        }
-        return BS(html) # , features=builder.features)
+        builder.preserve_whitespace_tags |= {"p", "span", "div", "tt", "code"}
+        return BS(html)  # , features=builder.features)
 
     @property
     def doc(self) -> Union[BS, Tag]:
         if self._doc is None:
             self._doc = HtmlToDiscord.parse(self.html)
         return self._doc
-    
+
     @property
     def title(self) -> str:
         if not self._title:
@@ -248,7 +247,7 @@ class HtmlToDiscord:
                 text = text.strip()
                 self._title = text
         return self._title
-    
+
     @property
     def url(self) -> str:
         if self._url is not None:
@@ -258,29 +257,26 @@ class HtmlToDiscord:
             self._url = canon.attrs["href"]
             return self._url
         return "//."
-    
+
     @staticmethod
-    def abs_url(base_url: Union[str,ParseResult], href: str) -> str:
+    def abs_url(base_url: Union[str, ParseResult], href: str) -> str:
         resolve_from = None
         resolve_from = urlparse(base_url) if isinstance(base_url, str) else base_url
         return urljoin(resolve_from.geturl(), href)
-    
+
     def to_discord(self, elem: Tag):
         for anchor in elem.select("a[href], link[href]"):
             href = anchor.attrs["href"]
             abs_href = HtmlToDiscord.abs_url(self.url, href)
             anchor.attrs["href"] = abs_href
-        
+
         for selector, tmpl in self.format_map.items():
             template = TemplateString(tmpl)
             for el in elem.select(selector):
                 el.replace_with(
-                    template.format_map({
-                        "text": el.text,
-                        "html": str(el),
-                        **el.attrs 
-                    })
+                    template.format_map({"text": el.text, "html": str(el), **el.attrs})
                 )
+
 
 class Wiki(commands.Cog):
     def __init__(self, bot: Bot) -> None:
@@ -288,16 +284,14 @@ class Wiki(commands.Cog):
         self.bot = bot
         type(self).__cog_name__ = "More"
 
-    @commands.command(help='Get the Wikipedia article about a subject')
+    @commands.command(help="Get the Wikipedia article about a subject")
     async def wiki(self, ctx, *, subject=""):
         await ctx.send(embed=self._do_wiki(subject))
-    
+
     def _do_wiki(self, name) -> Embed:
         results: WikiSearchResult = search_wiki(name)
         if not results:
-            return Embed(
-                description=f"No results found for {name!r}"
-            )
+            return Embed(description=f"No results found for {name!r}")
         if best := [
             r
             for r in results
@@ -311,31 +305,29 @@ class Wiki(commands.Cog):
         response = requests.get(url.url)
 
         if b"may refer to" in response.content:
-          conv = HtmlToDiscord(response.content.decode())
-          links = conv.doc.select('ul > li a[title]')
-          rel_url = links[0].attrs["href"]
-          url = HtmlToDiscord.abs_url(conv.url, rel_url)
-          title = links[0].text.strip()
-          response = requests.get(url)
+            conv = HtmlToDiscord(response.content.decode())
+            links = conv.doc.select("ul > li a[title]")
+            rel_url = links[0].attrs["href"]
+            url = HtmlToDiscord.abs_url(conv.url, rel_url)
+            title = links[0].text.strip()
+            response = requests.get(url)
 
         html = response.content
         odx = html.find(b"mf-section-0")
         if odx != -1:
-            html = html[:odx + 3000]
+            html = html[: odx + 3000]
 
         if images := get_wiki_images(result):
             thumbnail = images[0].href.url
         else:
-            thumbnail =  (
+            thumbnail = (
                 "https://upload.wikimedia.org"
                 "/wikipedia/commons/thumb/d/de"
                 "/Wikipedia_Logo_1.0.png"
                 "/768px-Wikipedia_Logo_1.0.png"
             )
         conv = HtmlToDiscord(html)
-        paras = conv.doc.select(
-            "#mf-section-0 > p:not(.mw-empty-elt)"
-        )
+        paras = conv.doc.select("#mf-section-0 > p:not(.mw-empty-elt)")
         if not paras:
             paras = conv.doc.select("p:not(.mw-empty-elt)")
         if not paras:
@@ -352,9 +344,9 @@ class Wiki(commands.Cog):
         embed.set_footer(
             text="wikipedia",
             icon_url="https://upload.wikimedia.org/wikipedia"
-                "/commons/thumb/2/2c"
-                "/Tango_style_Wikipedia_Icon.svg"
-                "/1200px-Tango_style_Wikipedia_Icon.svg.png",
+            "/commons/thumb/2/2c"
+            "/Tango_style_Wikipedia_Icon.svg"
+            "/1200px-Tango_style_Wikipedia_Icon.svg.png",
         )
         embed.set_thumbnail(url=thumbnail)
         return embed
