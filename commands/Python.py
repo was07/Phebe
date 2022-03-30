@@ -1,15 +1,17 @@
-from base import *
+import re
 from contextlib import redirect_stderr, redirect_stdout
-from disnake import Color
 from io import StringIO
-from re import subn, DOTALL
+from re import DOTALL, subn
 from tempfile import NamedTemporaryFile
 from traceback import print_exc
 from types import CodeType
-import getdoc
-from init import Formatted
-import re
+
 import requests
+from disnake import Color
+
+import getdoc
+from base import *
+from init import Formatted
 
 
 class Python(commands.Cog):

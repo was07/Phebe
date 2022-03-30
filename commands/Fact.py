@@ -1,7 +1,7 @@
-# this one is in construction
+from disnake import Color
 from base import *
 from factgen import random_fact
-from disnake import Color
+
 
 
 class Fact(commands.Cog):

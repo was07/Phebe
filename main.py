@@ -2,28 +2,28 @@
 Phebe
 A discord bot for the Python Experts Server
 """
+import logging
+import sys
 import disnake
-from disnake import Activity, ActivityType, Game
-from disnake.ext import commands
-
-import logging, sys
-
-
-logging.root.setLevel(logging.INFO)
-l = logging.getLogger("disnake.client")
-l.setLevel(logging.WARNING)
-logging.root.addHandler(logging.StreamHandler(sys.stderr))
-log = logging.getLogger(__name__)
-from pathlib import Path
+import asyncio
 import os
 import random
-from threading import Thread
-import asyncio
+import os
+import sys
+import threading
+import traceback
 import StayAlive
-from init import Config
+from pathlib import Path
+from threading import Thread
+from disnake import Activity, ActivityType, Game
+from disnake.ext import commands
 from base import *
+from init import Config
 
 
+logging.root.setLevel(logging.WARNING)
+logging.root.addHandler(logging.StreamHandler(sys.stderr))
+log = logging.getLogger(__name__)
 banned_words = ["@everyone", "@here"]
 
 
@@ -202,11 +202,7 @@ if __name__ == "__main__":
         try:
             bot.run(Config.token)
         except disnake.errors.HTTPException:
-            import traceback, sys, os
-
             traceback.print_exc(999, sys.stderr, True)
-            import threading
-
             try:
                 threading.shutdown()
             finally:

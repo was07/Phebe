@@ -1,13 +1,13 @@
-from base import *
-from init import Config
+import socket
 from functools import lru_cache
 from os import getcwd, getenv, uname
 from os.path import expanduser
 from pathlib import Path
 from shlex import join
 from typing import Union
-import socket
 
+from base import *
+from init import Config
 
 rules = [
     "Be respectful, civil, and welcoming to others in the server.",

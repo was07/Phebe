@@ -1,17 +1,17 @@
+import sys
+from typing import Union
+
+import disnake
+from disnake import Role
+from disnake.channel import ChannelType
+from disnake.embeds import Embed
 from disnake.ext import commands
 from disnake.ext.commands import Bot
 from disnake.ext.commands.core import Context
-from disnake.member import Member
 from disnake.guild import Guild
-from disnake.embeds import Embed
-from disnake.channel import ChannelType
+from disnake.member import Member
 from disnake.message import Message
-from disnake import Role
 from disnake.user import User
-from typing import Union
-import disnake
-import sys
-
 # for replit
 disnake
 commands

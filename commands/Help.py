@@ -1,17 +1,12 @@
 from base import *
-
-
-def override(func):
-    return func
-
-
-from logging import getLogger
 from init import Config
+from logging import getLogger
 from disnake.ext.commands.help import Paginator
-
-log = getLogger(__name__)
 from disnake.ext.commands.core import Command
 
+log = getLogger(__name__)
+
+def override(func): return func
 
 class MyHelpCommand(commands.DefaultHelpCommand):
     def __init__(self, **options):

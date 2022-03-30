@@ -1,7 +1,6 @@
+from random import randint
 from replit import db
 from base import *
-from random import randint
-
 # overnotice:just tring to make something that i am not even sure
 
 # gives and tell facts about something that user is asking for
