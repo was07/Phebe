@@ -20,7 +20,6 @@ from disnake.ext import commands
 from base import *
 from init import Config
 
-
 logging.root.setLevel(logging.WARNING)
 logging.root.addHandler(logging.StreamHandler(sys.stderr))
 log = logging.getLogger(__name__)
@@ -31,18 +30,15 @@ class Phebe(commands.Cog):
     """
     Official bot for the Pythonic Hangout server
     """
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
         """show message when bot gets online"""
-        print(
-            "\u001b[34m"
-            + f"[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms"
-            + "\u001b[0m"
-        )
+        print("\u001b[34m" +
+              f"[+] Bot is running! \n[+] Ping: {self.bot.latency*1000} ms" +
+              "\u001b[0m")
         self.bot.loop.create_task(self.status_task())
 
     ## XXX TODO: Migrate to commands.WordFilter
@@ -57,21 +53,22 @@ class Phebe(commands.Cog):
         for word in banned_words:
             if word in message.content.lower():
                 await message.delete()
-                await message.author.send(
-                    embed=disnake.Embed(
-                        title="Warning",
-                        description=f"**{author.mention}: Your message got deleted by saying** *{word}* __that is a banned word.__",
-                    )
-                )
+                await message.author.send(embed=disnake.Embed(
+                    title="Warning",
+                    description=
+                    f"**{author.mention}: Your message got deleted by saying** *{word}* __that is a banned word.__",
+                ))
 
     ## XXX TODO: Migrate to commands.Status
     async def status_task(self):
         if Config.prefix == ".":
             return
         for activity in (
-            Game(name=".help"),
-            Activity(type=ActivityType.watching, name="Members in Servers"),
-            Activity(type=ActivityType.listening, name="Moderation team command."),
+                Game(name=".help"),
+                Activity(type=ActivityType.watching,
+                         name="Members in Servers"),
+                Activity(type=ActivityType.listening,
+                         name="Moderation team command."),
         ):
             await self.bot.change_presence(activity=activity)
             await asyncio.sleep(30)
@@ -80,12 +77,11 @@ class Phebe(commands.Cog):
     @commands.command()
     async def ping(self, ctx):
         """Show latency in mili seconds"""
-        await ctx.send(
-            embed=disnake.Embed(
-                title="Pong!",
-                description=f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms",
-            )
-        )
+        await ctx.send(embed=disnake.Embed(
+            title="Pong!",
+            description=
+            f"🟢 **Bot is active**\n\n🕑 **Latency: **{round(self.bot.latency*1000, 3)} ms",
+        ))
 
     ## XXX TODO: Migrate to commands.Warn
     @commands.command()
@@ -105,10 +101,12 @@ class Phebe(commands.Cog):
         """Show profile picture of a user, or see yours"""
 
         embed = disnake.Embed(
-            title=f"Profile Picture of {ctx.author.display_name if member is None else member.display_name}"
+            title=
+            f"Profile Picture of {ctx.author.display_name if member is None else member.display_name}"
         )
 
-        embed.set_image(url=ctx.author.avatar if member is None else member.avatar)
+        embed.set_image(
+            url=ctx.author.avatar if member is None else member.avatar)
         await ctx.send(embed=embed)
 
     ## XXX TODO: Migrate to commands.Flip
@@ -135,24 +133,21 @@ class Phebe(commands.Cog):
         """roll a virtual dice and get the result"""
         comp = random.randint(1, 6)
 
-        await ctx.reply(
-            embed=disnake.Embed(title="Rolled a dice", description=f"Result is {comp}")
-        )
+        await ctx.reply(embed=disnake.Embed(title="Rolled a dice",
+                                            description=f"Result is {comp}"))
 
     ## XXX TODO: Migrate to commands.Format
     @commands.command()
     async def format(self, ctx):
-        await ctx.send(
-            embed=disnake.Embed(
-                title="Code formatting",
-                ddescription="""
+        await ctx.send(embed=disnake.Embed(
+            title="Code formatting",
+            ddescription="""
 		To properly format Python code in Discord, write your code like this:
 
 \\`\\`\\`py
 print("Hello world")\n\\`\\`\\`\n\n    **These are backticks, not quotes**. They are often under the Escape (esc) key on most keyboard orientations, they could be towards the right side of the keyboard if you are using eastern european/balkan language keyboards.
 """,
-            )
-        )
+        ))
 
 
 if __name__ == "__main__":
@@ -190,8 +185,8 @@ if __name__ == "__main__":
 
                 print(
                     "\x0a".join(
-                        traceback.format_exception(type(exc), exc, exc.__traceback__)
-                    ),
+                        traceback.format_exception(type(exc), exc,
+                                                   exc.__traceback__)),
                     file=sys.stderr,
                 )
 

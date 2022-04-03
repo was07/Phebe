@@ -32,7 +32,7 @@ class MyHelpCommand(commands.DefaultHelpCommand):
         )
 
     async def send_bot_help(self, mapping):
-        embed = disnake.Embed(title="help")
+        embed = disnake.Embed(title="Help Panel")
 
         for cog, commands in mapping.items():
             commands = await self.filter_commands(commands, sort=True)
