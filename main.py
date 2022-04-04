@@ -8,8 +8,6 @@ import disnake
 import asyncio
 import os
 import random
-import os
-import sys
 import threading
 import traceback
 import StayAlive
