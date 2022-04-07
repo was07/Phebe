@@ -1,3 +1,4 @@
+import inspect
 import sys
 from typing import Union
 
@@ -45,7 +46,11 @@ def setup(bot: commands.Bot):
     module_name = [k for k in sys.modules.keys() if k.startswith("commands")][-1]
     class_name = module_name.split(".")[-1]
     module = sys.modules.get(module_name)
-    cog_cls = getattr(module, class_name)
+    cog_cls = next(
+        v
+        for k, v in inspect.getmembers(module)
+        if k.lower() == class_name.lower() and inspect.isclass(v)
+    )
     cog_obj = cog_cls(bot)
     print(f"Loading extension comand: {class_name} ...", end="")
     bot.add_cog(cog_obj)

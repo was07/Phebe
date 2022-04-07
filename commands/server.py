@@ -5,7 +5,7 @@ from typing import Union
 
 import disnake
 
-from base import Bot, commands, Context, Embed
+from base import Bot, commands, Context, Embed, setup  # noqa: F401
 from init import Config
 
 # Was this copied from PyDis?

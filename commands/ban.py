@@ -1,4 +1,4 @@
-from base import Bot, commands, Context, Member
+from base import Bot, commands, Context, Member, setup  # noqa: F401
 
 
 class Ban(commands.Cog):

@@ -6,7 +6,7 @@ import disnake
 from disnake import Color
 
 import getdoc
-from base import Bot, commands
+from base import Bot, commands, setup  # noqa: F401
 from init import Formatted
 
 

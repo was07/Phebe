@@ -12,7 +12,7 @@ from bs4.builder import FAST, HTMLParserTreeBuilder
 from furl import furl as URL
 from requests import get
 
-from base import commands, Bot, Embed
+from base import commands, Bot, Embed, setup  # noqa: F401
 
 TFunc = TypeVar("TFunc", bound=Callable)
 

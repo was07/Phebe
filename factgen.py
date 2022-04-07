@@ -23,8 +23,3 @@ def random_fact() -> tuple[str, str]:
     source = fact["source_url"]
 
     return (text, source)
-
-
-text, source = random_fact()
-print(text)
-print("From: " + source)

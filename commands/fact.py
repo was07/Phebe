@@ -1,6 +1,6 @@
 from disnake import Color
 
-from base import Bot, commands, Embed, Context
+from base import Bot, commands, Embed, Context, setup  # noqa: F401
 from factgen import random_fact
 
 

@@ -4,7 +4,7 @@ import disnake
 from disnake.ext.commands.help import Paginator
 from disnake.ext.commands.core import Command
 
-from base import commands, Embed, Bot
+from base import commands, Embed, Bot, setup  # noqa: F401
 from init import Config
 
 log = getLogger(__name__)
@@ -24,7 +24,7 @@ class PhebeHelpCommand(commands.DefaultHelpCommand):
 
         super().__init__(**options)
 
-        self.context.bot = self.context.bot
+        self.context.bot = bot  # noqa: F821
 
     def get_command_signature(self, command) -> None:
         return (
