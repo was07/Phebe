@@ -21,7 +21,7 @@ class Config:
     sentinel = object()
 
     def __init__(self):
-        self.token = "ODgwMzg0NDI3NTkzNzIzOTY0.YSdf5A.6ozjUp8BNpZ_M4yXy3Ham6sSSB8"
+        self.token = self.load_var("Token")
         self.prefix = self.load_var("Prefix", ".")
 
     def __getattr__(self, key):
