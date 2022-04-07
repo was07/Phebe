@@ -2,10 +2,9 @@ import re
 from enum import Enum
 from functools import lru_cache
 from itertools import starmap
-from typing import Any, Callable, NamedTuple, Optional, TypeVar, Union
-from urllib.parse import ParseResult, quote, urljoin, urlparse
+from typing import Callable, NamedTuple, Optional, TypeVar, Union
+from urllib.parse import ParseResult, urljoin, urlparse
 
-import bs4
 import requests
 from bs4 import BeautifulSoup as BS
 from bs4 import Tag, TemplateString
@@ -13,7 +12,7 @@ from bs4.builder import FAST, HTMLParserTreeBuilder
 from furl import furl as URL
 from requests import get
 
-from base import *
+from base import commands, Bot, Embed
 
 TFunc = TypeVar("TFunc", bound=Callable)
 
@@ -22,6 +21,7 @@ def cache(func: TFunc) -> TFunc:
     return lru_cache(maxsize=0)(func)
 
 
+# I just know this code was copied somewhere. - sz_skill
 class WikiProfile(Enum):
     """
     Search profile to use.
@@ -97,14 +97,14 @@ def search_wiki(
             "Referer": wiki_api_url.url,
             "Accept": "application/json",
         },
-        params=dict(
-            action="opensearch",
-            format="json",
-            limit=max_results,
-            profile=profile.value,
-            redirects=redirects.value,
-            search=query,
-        ),
+        params={
+            "action": "opensearch",
+            "format": "json",
+            "limit": max_results,
+            "profile": profile.value,
+            "redirects": redirects.value,
+            "search": query,
+        },
     )
     if resp.status_code != 200:
         raise Exception()
@@ -132,24 +132,21 @@ def get_wiki_images(
             "Referer": wiki_api_url.url,
             "Accept": "application/json",
         },
-        params=dict(
-            action="query",
-            format="json",
-            prop="images",
-            titles=result.title,
-        ),
+        params={
+            "action": "query",
+            "format": "json",
+            "prop": "images",
+            "titles": result.title,
+        },
     )
     if resp.status_code != 200:
         raise Exception()
     im_results = []
 
-    for pid, page in resp.json()["query"]["pages"].items():
-        pageid = page["pageid"]
-        page_title = page["title"]
+    for _, page in resp.json()["query"]["pages"].items():
         del page["ns"]
         images: list[dict[str, Union[int, str]]] = page["images"]
         for image in images:
-            ns = image["ns"]
             im_title = image["title"]
             del image["title"]
             scheme, _, filename = im_title.partition(":")
@@ -301,7 +298,7 @@ class Wiki(commands.Cog):
             result = best[0]
         else:
             result = results[0]
-        title, url = result.title, result.url
+        url = result.url
         response = requests.get(url.url)
 
         if b"may refer to" in response.content:
@@ -309,7 +306,6 @@ class Wiki(commands.Cog):
             links = conv.doc.select("ul > li a[title]")
             rel_url = links[0].attrs["href"]
             url = HtmlToDiscord.abs_url(conv.url, rel_url)
-            title = links[0].text.strip()
             response = requests.get(url)
 
         html = response.content

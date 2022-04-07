@@ -50,7 +50,7 @@ def log_request(request):
     for k, v in inspect.getmembers(request):
         try:
             log.info("%s=%s", k, v)
-        except:
+        except Exception:
             log.info("%s=%s", k, type(v).__qualname__)
 
 
