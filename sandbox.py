@@ -1,21 +1,19 @@
+import contextlib
+import subprocess
+import types
+import sys
+from collections.abc import Mapping
+
+
 class FakeStream(__import__("io").StringIO):
     def fileno(self):
         return 1
 
 
 def _t():
-    import types, sys
-    from collections.abc import Mapping
-
     __sys_mod = sys.modules
-    _ModDict__sys_mod = __sys_mod
-
-    import subprocess
 
     def run(src):
-        # sio_stdout, sio_stderr = (StringIO(), StringIO())
-        sio_stdout, sio_stderr = (FakeStream(), FakeStream())
-
         p = subprocess.run(
             ["timeout", "0.5s", "env", "-i", sys.executable, __file__],
             input=src,
@@ -35,8 +33,6 @@ def _t():
                 traceback.print_exc()
 
         rs = p.returncode
-        output = sio_stdout.getvalue()
-        errors = sio_stderr.getvalue()
         return (rs, p.stdout, p.stderr)
 
     run.sys = sys
@@ -126,9 +122,12 @@ def _t():
         if event == "os.system":
             if arg[0] == b"(pager) 2>/dev/null":
                 return
-        elif event == "subprocess.Popen":
-            if arg[0] == "/bin/sh" and arg[1] == ["/bin/sh", "-c", "pager"]:
-                return
+        elif (
+            event == "subprocess.Popen"
+            and arg[0] == "/bin/sh"
+            and arg[1] == ["/bin/sh", "-c", "pager"]
+        ):
+            return
 
         # print(f"{event=!r}, {arg=!r}")
         if event in ("sys.unraisablehook", "sys.excepthook"):
@@ -177,8 +176,6 @@ def _t():
 
     global __name__
     if __name__ == "__main__":
-        import builtins, sys
-
         sys.addaudithook(audit_hook)
         code = compile(sys.stdin.read(), "<eval command>", "exec")
         import builtins
@@ -186,23 +183,12 @@ def _t():
         # del __import__
 
         sys_modules = ModDict()
-        try:
-            del sys.modules["os"]
-        except:
-            pass
-        try:
-            del sys.modules["sys"]
-        except:
-            pass
+
+        with contextlib.suppress(Exception):
+            for module_to_delete in ("os", "sys"):
+                del sys.modules[module_to_delete]
+
         sys.modules = sys_modules
-        try:
-            del sys
-        except:
-            pass
-        try:
-            del os
-        except:
-            pass
 
         exec(code, {**builtins.__dict__, "__name__": "__maim__"})
         raise SystemExit(0)
@@ -211,4 +197,3 @@ def _t():
 
 
 (_ := _t(), globals().__delitem__("_"))
-

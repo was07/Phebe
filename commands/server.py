@@ -1,22 +1,31 @@
 import socket
 from functools import lru_cache
-from os import getcwd, getenv, uname
-from os.path import expanduser
-from pathlib import Path
-from shlex import join
+from os import uname
 from typing import Union
 
-from base import *
+import disnake
+
+from base import Bot, commands, Context, Embed, setup  # noqa: F401
 from init import Config
 
+# Was this copied from PyDis?
 rules = [
     "Be respectful, civil, and welcoming to others in the server.",
     "The language of this server is English, Use English to the best of your ability."
     "Be polite if someone speaks English imperfectly.",
-    "Do not misuse or spam/troll in any of the channels, Do not attempt to bypass any blocked words.",
-    "Do not advertise anything without permission. No Discord server invite links or codes.",
-    "Controversial topics such as religion or politics are not allowed (even in off topic).",
-    "ping someone only when there is legitimate reasoning behind them.",
+    (
+        "Do not misuse or spam/troll in any of the channels, Do not attempt to bypass"
+        + " any blocked words."
+    ),
+    (
+        "Do not advertise anything without permission. No Discord server invite links"
+        + " or codes."
+    ),
+    (
+        "Controversial topics such as religion or politics are not allowed (even in off"
+        + " topic)."
+    ),
+    "Ping someone only when there is legitimate reasoning behind them.",
     "Follow the Discord Community Guidelines and Terms of Service.",
 ]
 
@@ -50,7 +59,7 @@ class Server(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def rule(self, ctx: Context, number: int):
+    async def rule(self, ctx: Context, number: int) -> None:
         """Shows you the specified rule with that index."""
 
         if not 0 < number < len(rules) + 1:
@@ -63,12 +72,12 @@ class Server(commands.Cog):
         )
 
     @commands.command()
-    async def rules(self, ctx: Context):
+    async def rules(self, ctx: Context) -> None:
         """Shows you all of the rules."""
 
         await ctx.send(
             embed=disnake.Embed(
-                title=f"Rules",
+                title="Rules",
                 url=rules_channel,
             )
         )
@@ -76,14 +85,14 @@ class Server(commands.Cog):
 
     @commands.command(help="Get information about server", aliases=["serverinfo"])
     async def server(self, ctx: Context) -> None:
-        """Shows you the info of the server."""
+        """Shows you information about this server."""
 
         guild = ctx.guild
 
         offline_members = 0
         online_members = 0
 
-        sysname, nodename, release, version, arch = uname()
+        sysname, _, _, _, arch = uname()
 
         for member in guild.members:
             if member.status == disnake.Status.offline:
