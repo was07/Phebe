@@ -35,7 +35,7 @@ class PhebeHelpCommand(commands.DefaultHelpCommand):
         embed = disnake.Embed(title="Help Panel")
 
         for cog, cmds in mapping.items():
-            cmds = await self.filter_commands(commands, sort=True)
+            cmds = await self.filter_commands(cmds, sort=True)
             command_signatures = [self.get_command_signature(c) for c in cmds]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
