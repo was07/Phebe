@@ -229,6 +229,14 @@ class HtmlToDiscord:
         if self._doc is None:
             self._doc = HtmlToDiscord.parse(self.html)
         return self._doc
+        
+    @property
+    def thumbnail(self) -> str:
+        img =  self.doc.select('a[href*="File:"] img[srcset]')[0]
+        src = img.attrs.get("srcset") or img.attrs.get("src") or img.attrs.get("data-src") or ""
+        if src.startswith("//"):
+            src = f"https:{src}"
+        return src.split()[0]
 
     @property
     def title(self) -> str:
@@ -313,15 +321,6 @@ class Wiki(commands.Cog):
         if odx != -1:
             html = html[: odx + 3000]
 
-        if images := get_wiki_images(result):
-            thumbnail = images[0].href.url
-        else:
-            thumbnail = (
-                "https://upload.wikimedia.org"
-                "/wikipedia/commons/thumb/d/de"
-                "/Wikipedia_Logo_1.0.png"
-                "/768px-Wikipedia_Logo_1.0.png"
-            )
         conv = HtmlToDiscord(html)
         paras = conv.doc.select("#mf-section-0 > p:not(.mw-empty-elt)")
         if not paras:
@@ -344,5 +343,5 @@ class Wiki(commands.Cog):
             "/Tango_style_Wikipedia_Icon.svg"
             "/1200px-Tango_style_Wikipedia_Icon.svg.png",
         )
-        embed.set_thumbnail(url=thumbnail)
+        embed.set_thumbnail(url=conv.thumbnail)
         return embed
