@@ -1,6 +1,6 @@
 """
 Phebe
-A discord bot for the Python Experts Server
+A discord bot for the Pythonic Hangouts Server
 """
 import logging
 import sys
@@ -114,7 +114,7 @@ class Phebe(commands.Cog):
 
         embed = disnake.Embed(
             title=(
-                "Profile Picture of"
+                "Profile Picture of "
                 + f"{ctx.author.display_name if not member else member.display_name}"
             ),
         )
