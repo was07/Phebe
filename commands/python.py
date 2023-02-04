@@ -1,16 +1,12 @@
 import re
-from contextlib import redirect_stderr, redirect_stdout
-from io import StringIO
 from re import DOTALL, subn
-from tempfile import NamedTemporaryFile
-from traceback import print_exc
-from types import CodeType
 
 import requests
+import disnake
 from disnake import Color
 
 import getdoc
-from base import *
+from base import Bot, commands, setup  # noqa: F401
 from init import Formatted
 
 
@@ -22,14 +18,14 @@ class Python(commands.Cog):
         self.bot = bot
         type(self).__cog_name__ = "Python"
 
-    @commands.command(help="Run/Evaluate Python code", aliases=["eval"])
-    async def e(self, ctx, *, source: str = ""):
+    @commands.command(aliases=["eval"])
+    async def e(self, ctx, *, source: str = "") -> None:
+        """Runs/evaluates Python code."""
+
         if ctx.author.id == 883987539961192508:  # 00001H
-            await ctx.reply("Sorry, Eval is not available, **for you.**")
+            await ctx.reply("Sorry, eval is not available **for you.**")
             return
 
-        result: Any
-        code: CodeType
         color: Color
         source = source.strip()
         source = subn(r"(^|\n)``?`?(?:py|)", "\\1", source, DOTALL)[0]
@@ -71,7 +67,8 @@ class Python(commands.Cog):
             outcome = "successfully" if rs == 0 else "unsuccessfully"
             if not stderr and not stdout:
                 output.append(
-                    f"Program {outcome} completed with exit status {rs} and produced no output."
+                    f"Program {outcome} completed with exit status {rs} and produced no"
+                    + " output."
                 )
             else:
                 output.append(f"Program {outcome} completed with exit status {rs}.")
@@ -84,15 +81,18 @@ class Python(commands.Cog):
             )
         )
 
-    @commands.command(help="Get the Documentation of a python object", aliases=["doc"])
-    async def d(self, ctx, symbol: str = "", nparas: int = 1):
-        """Get the Documentation of a python object"""
+    @commands.command(aliases=["doc"])
+    async def d(self, ctx, symbol: str = "", nparas: int = 1) -> None:
+        """Gets the documentation of a Python object."""
+
         symbol = symbol.strip("`")
         if symbol == "Creds":
             await ctx.send(
                 embed=disnake.Embed(
                     title="Credits",
-                    description="Made by `Greyblue92`, `Was'` and `Pancake`, `sz_skill`",
+                    description=(
+                        "Made by `Greyblue92`, `Was'` and `Pancake`, `sz_skill`"
+                    ),
                 )
             )
         elif symbol:
@@ -107,8 +107,10 @@ class Python(commands.Cog):
                 )
             )
 
-    @commands.command(help="Get the documentation of a python object", alias="pypi")
-    async def pypi(self, ctx, name=None):
+    @commands.command()
+    async def pypi(self, ctx, name=None) -> None:
+        """Retrieves information about a PyPI package."""
+
         if name is None:
             await ctx.send("Package name required.")
             return
@@ -134,14 +136,15 @@ class Python(commands.Cog):
         )
 
 
-def format(text, lines=6):
+def format(text, lines=6) -> str:
+    """What does this do? I'm not even gonna bother writing a proper docstring for
+    this."""
+
     res = ""
     text = re.compile(r"\s*</?(?:(?!\n[\n\r#]).)*>\s*", re.DOTALL).subn("\n\n", text)[0]
     text = text.replace("```python", "__start_py")
-    l = 0
-    for line in text.splitlines():
+    for line_no, line in enumerate(text.splitlines()):
         line = line.strip()
-        l += 1
         if line.startswith("##"):
             res += f"*{line.lstrip('##').strip()}*"
         elif line.startswith("#"):
@@ -159,7 +162,7 @@ def format(text, lines=6):
         else:
             res += line
         res += "\n"
-        if l >= lines and "__start_py" in res and "```" not in res:
+        if line_no >= lines and "__start_py" in res and "```" not in res:
             res += "```"
             break
 

@@ -1,3 +1,4 @@
+from logging import warn
 import os
 import sys
 from typing import Optional
@@ -63,7 +64,7 @@ class Config:
 Config = Config()
 
 
-class Formatted:
+class Formatted:  # noqa: SIM119
     def __init__(self, fixed_part, formatted_paras, elem: Optional[Tag] = None):
         self.fixed_part = fixed_part
         self.formatted_paras = formatted_paras
